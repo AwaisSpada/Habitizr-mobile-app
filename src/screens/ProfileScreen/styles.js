@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A5BA0',
     marginBottom: 10,
+    paddingTop:30
   },
   upgradeText: {
     color: "white",
@@ -36,10 +37,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   subHeader: {
     fontSize: 18,
@@ -133,10 +138,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
     padding: 20,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
     marginBottom: 15,
   },
   sectionTitle: {
@@ -175,6 +184,26 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 10,
   },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 15,
+    zIndex: 10,
+  },
+  accountContainer:{
+    padding: 20, 
+    backgroundColor: 'white', 
+    borderRadius: 30, 
+    marginTop: 30,
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
+  }
 });
 
 export default styles;

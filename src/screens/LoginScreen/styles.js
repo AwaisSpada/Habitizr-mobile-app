@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
     color: 'rgb(53,101,208)',
-    paddingTop:30
+    paddingTop:50
   },
   subHeader: {
     fontSize: 16,
@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
   title: { 
     fontSize: 24, 
     fontWeight: "bold", 
-    marginBottom: 5 
+    marginBottom: 5,
+    paddingTop:20
   },
   subtitle: { 
     fontSize: 14, 
@@ -60,8 +61,8 @@ const styles = StyleSheet.create({
   switchContainer: { 
     flexDirection: "row", 
     backgroundColor: "rgb(245,245,245)", 
-    borderRadius: 10, 
-    width: "95%", 
+    borderRadius: 12, 
+    width: "100%", 
     padding: 5, 
     marginBottom: 20,
     marginTop:20
@@ -70,14 +71,18 @@ const styles = StyleSheet.create({
     flex: 1, 
     padding: 8, 
     alignItems: "center", 
-    borderRadius: 10 
+    borderRadius: 12
   },
   activeButton: { 
     backgroundColor: "#fff", 
-    shadowColor: "#000", 
-    shadowOpacity: 0.1, 
-    shadowRadius: 3, 
-    elevation: 2 
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   switchText: { 
     fontSize: 16, 
@@ -140,14 +145,14 @@ const styles = StyleSheet.create({
     padding:20,
     borderRadius:20,
     marginTop:30,
-    shadowColor: "#000",
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   separatorContainer: {
     flexDirection: "row", 
@@ -174,7 +179,7 @@ const styles = StyleSheet.create({
     paddingTop:20
   },
   formContainer: {
-    width: "95%",
+    width: "100%",
   },
   sectionTitle: {
     fontSize: 22,
@@ -185,16 +190,19 @@ const styles = StyleSheet.create({
     paddingTop:30
   },
   featureCard: {
-    width: "90%",
+    width: "100%",
     backgroundColor: "white",
     borderRadius: 15,
     padding: 30,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3, // Shadow for Android
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   featureTitle: {
     fontSize: 16,
@@ -206,6 +214,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     textAlign: "center",
+  },
+  mainTitle: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: 'rgb(113,177,224)'
   },
 });
 

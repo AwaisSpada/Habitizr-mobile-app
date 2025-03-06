@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, Image, ScrollView
-} from "react-native";
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import styles from './styles';
 
 const LoginScreen = (props) => {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        {/* Logo */}
-        <Image
+    <View style={styles.container}>
+      {/* Logo */}
+      {/* <Image
           source={require('../../assets/images/logo.png')}
           style={styles.logo}
-        />
+        /> */}
+      <View style={{ paddingTop: 60, alignSelf: 'flex-start', paddingLeft: 10 }}>
+        <Text style={styles.mainTitle}>Habitizr</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
 
         {/* Header Text */}
         <Text style={styles.header}>
@@ -33,7 +34,7 @@ const LoginScreen = (props) => {
           </Text>
 
           {/* Social Login Buttons */}
-          <View style={{ alignItems: 'center',paddingTop:20 }}>
+          <View style={{ alignItems: 'center', paddingTop: 20 }}>
             <View style={styles.socialContainer}>
               <TouchableOpacity style={styles.socialButton}>
                 <Text style={styles.socialText}>G Google</Text>
@@ -115,21 +116,21 @@ const LoginScreen = (props) => {
           </Text>
         </View>
 
-        <View style={[styles.featureCard, {marginTop:20}]}>
+        <View style={[styles.featureCard, { marginTop: 20 }]}>
           <Text style={styles.featureTitle}>AI-Powered Insights</Text>
           <Text style={styles.featureText}>
             Get personalized feedback and motivation based on your responses.
           </Text>
         </View>
 
-        <View style={[styles.featureCard, {marginTop:20}]}>
+        <View style={[styles.featureCard, { marginTop: 20 }]}>
           <Text style={styles.featureTitle}>Proven Results</Text>
           <Text style={styles.featureText}>
             Join thousands who have successfully built lasting habits with our platform.
           </Text>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

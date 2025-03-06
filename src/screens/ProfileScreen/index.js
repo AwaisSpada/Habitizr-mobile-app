@@ -1,15 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import styles from './styles'
+import { useNavigation } from '@react-navigation/native';
+import styles from './styles';
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.safeContainer}>
-
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
+
+          {/* Back Button */}
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Icon name="arrow-left" size={24} color="black" />
+          </TouchableOpacity>
+
           <Text style={styles.header}>Profile Settings</Text>
+
           <View style={styles.card}>
             <Text style={styles.subHeader}>Subscription Details</Text>
             <Text style={styles.description}>Your current plan and subscription status</Text>
@@ -39,7 +48,7 @@ const ProfileScreen = () => {
             </View>
           </View>
 
-          <View style={{ padding: 20, backgroundColor: 'white', borderRadius: 30, marginTop: 30 }}>
+          <View style={styles.accountContainer}>
             <Text style={styles.title}>Account Settings</Text>
             <Text style={styles.subtitle}>Manage your account settings and preferences</Text>
 
@@ -69,12 +78,11 @@ const ProfileScreen = () => {
             <TouchableOpacity style={styles.upgradeButton}>
               <Text style={styles.upgradeText}>Update Profile</Text>
             </TouchableOpacity>
-            <View style={{ borderBottomWidth: 1, borderBottomColor: 'lightgrey', width: '100%', paddingTop:30 }} />
+            <View style={{ borderBottomWidth: 1, borderBottomColor: 'lightgrey', width: '100%', paddingTop: 30 }} />
             <Text style={styles.upgradeText1}>Danger Zone </Text>
             <TouchableOpacity style={styles.upgradeButton1}>
               <Text style={styles.upgradeText}>Delete Account</Text>
             </TouchableOpacity>
-
           </View>
         </View>
       </ScrollView>

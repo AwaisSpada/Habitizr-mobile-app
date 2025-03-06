@@ -53,11 +53,14 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 12,
     position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3, // Shadow for Android
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   cardTitle: {
     fontSize: 14,
@@ -159,11 +162,14 @@ const styles = StyleSheet.create({
     margin: 10,
     marginBottom: 12,
     position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3, // Shadow for Android
+    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
+    shadowRadius: 4, // Increase radius for a softer look
+    elevation: 4, // Keep elevation for Android shadow
   },
   subtitle: {
     fontSize: 18,
