@@ -17,7 +17,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     marginBottom: 20,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
+    paddingTop:20
   },
   logo: {
     fontSize: 18,
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgb(41,121,255)", // Blue button
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 10,
+    borderRadius: 15,
     right: 10
   },
   upgradeText: {
@@ -236,6 +237,65 @@ const styles = StyleSheet.create({
   reportText: {
     color: "#6C7C9B",
     fontSize: 14,
+  },
+  loaderContainer: {
+    alignItems:'center',
+    justifyContent:'center',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  subHeaderText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 15,
+  },
+  section: {
+    marginVertical: 5,
+    paddingTop:5
+
+  },
+  sectionHeading: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#4A90E2",
+  },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingTop:5
+  },
+  positiveText: {
+    color: "green",
+  },
+  negativeText: {
+    color: "orange",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#ddd",
+    width: "100%",
+    marginVertical: 10,
+  },
+  consistencyLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    marginTop: 10,
+  },
+  scoreText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#4A90E2",
+    marginTop: 5,
   },
 });
 

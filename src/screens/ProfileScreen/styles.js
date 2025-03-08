@@ -7,10 +7,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: 'white',
     padding: 20,
   },
-  headerProfile:{
+  headerProfile: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#3A5BA0',
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3A5BA0',
     marginBottom: 10,
-    paddingTop:30
+    paddingTop: 30
   },
   upgradeText: {
     color: "white",
@@ -45,6 +45,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
     shadowRadius: 4, // Increase radius for a softer look
     elevation: 4, // Keep elevation for Android shadow
+    borderWidth: 1,
+    borderColor: 'lightgrey'
   },
   subHeader: {
     fontSize: 18,
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   memberSinceContainer: {
-    marginBottom: 15,
+    marginBottom: 15
   },
   memberSince: {
     fontSize: 16,
@@ -103,23 +105,23 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
   },
-  upgradeButton1:{
+  upgradeButton1: {
     backgroundColor: 'rgb(221,81,76)',
     padding: 12,
     borderRadius: 15,
     alignItems: 'center',
-    marginTop:20
+    marginTop: 20
   },
   upgradeText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
   },
-  upgradeText1:{
+  upgradeText1: {
     color: 'red',
     fontWeight: 'bold',
     fontSize: 22,
-    paddingTop:10
+    paddingTop: 10
   },
   scrollContainer: {
     paddingBottom: 20,  // Prevent content from getting cut off at the bottom
@@ -147,6 +149,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4, // Increase radius for a softer look
     elevation: 4, // Keep elevation for Android shadow
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'lightgrey'
   },
   sectionTitle: {
     fontSize: 18,
@@ -161,7 +165,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   warningText: {
-    color: '#E69A00',
     fontWeight: 'bold',
   },
   inputLabel: {
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     backgroundColor: '#f9f9f9',
-    marginTop:15
+    marginTop: 15
   },
   hintText: {
     fontSize: 12,
@@ -190,10 +193,10 @@ const styles = StyleSheet.create({
     left: 15,
     zIndex: 10,
   },
-  accountContainer:{
-    padding: 20, 
-    backgroundColor: 'white', 
-    borderRadius: 30, 
+  accountContainer: {
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 30,
     marginTop: 30,
     shadowColor: "#aaa", // Change from black to gray for a softer shadow
     shadowOffset: {
@@ -203,7 +206,66 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
     shadowRadius: 4, // Increase radius for a softer look
     elevation: 4, // Keep elevation for Android shadow
-  }
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    width: "100%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  deleteButton: {
+    backgroundColor: "rgb(246, 49, 42)",
+    paddingVertical: 12,
+    width: "100%",
+    borderRadius: 15,
+    alignItems: "center",
+  },
+  deleteText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    marginTop: 10,
+    paddingVertical: 12,
+    width: "100%",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+  },
+  cancelText: {
+    fontSize: 16,
+    color: "#333",
+  },
 });
 
 export default styles;

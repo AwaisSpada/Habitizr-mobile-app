@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker'
+import DatePicker from 'react-native-date-picker';
+import { Calendar } from 'react-native-calendars';
 
-const HabitCreationModal = ({ visible, onClose }) => {
+const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }) => {
+  console.log('edit values', habit)
   const [habitName, setHabitName] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('Daily');
@@ -14,12 +17,55 @@ const HabitCreationModal = ({ visible, onClose }) => {
   const [openFrequency, setOpenFrequency] = useState(false);
   const [openTimezone, setOpenTimezone] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDates, setSelectedDates] = useState({});
+  const [timezoneItems, setTimezoneItems] = useState([]);
 
-  const handleTimeChange = (event, selectedTime) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      setReminderTime(selectedTime);
+  const moment = require('moment-timezone');
+
+  useEffect(() => {
+    const formattedTimezones = moment.tz.names().map((tz) => ({ label: tz, value: tz }));
+    setTimezoneItems(formattedTimezones);
+  }, []);
+
+  useEffect(() => {
+    // Update modal fields when editing an existing habit
+    if (selectedHabit) {
+      setHabitName(selectedHabit.name || '');
+      setDescription(selectedHabit.description || '');
+      setFrequency(habit.selectedHabit || 'Daily');
+      setReminderTime(selectedHabit.reminderTime ? new Date(selectedHabit.reminderTime) : new Date());
+      setTimezone(selectedHabit.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
+  }, [selectedHabit]);
+
+  const handleSubmit = () => {
+    if (!habitName.trim()) return;
+    const updatedHabit = { habitName, description, frequency, reminderTime, timezone, selectedDates };
+    onCreate(updatedHabit);
+    setHabitName('');
+    setDescription('');
+  };
+
+  const toggleDateSelection = (day) => {
+    const dateString = day.dateString;
+    setSelectedDates((prevDates) => {
+      const updatedDates = { ...prevDates };
+
+      if (updatedDates[dateString]) {
+        delete updatedDates[dateString]; // Deselect date
+      } else {
+        updatedDates[dateString] = { selected: true, selectedColor: 'blue' }; // Select date
+      }
+
+      return updatedDates;
+    });
+  };
+
+  const handleConfirmTime = date => {
+    console.log('check handleConfirmTime', date)
+    setReminderTime(date);
+    // setOpenTimePicker(false);
   };
 
   return (
@@ -31,7 +77,7 @@ const HabitCreationModal = ({ visible, onClose }) => {
               <TouchableOpacity onPress={onClose} style={styles.closeIcon}>
                 <AntDesign name="close" size={24} color="black" />
               </TouchableOpacity>
-              <Text style={styles.heading}>Create a New Habit</Text>
+              <Text style={styles.heading}>{selectedHabit ? "Edit Habit" : "Create a New Habit"}</Text>
               <Text style={styles.description}>Start your journey by creating your first habit</Text>
 
               <Text style={styles.label}>Habit Name</Text>
@@ -67,6 +113,13 @@ const HabitCreationModal = ({ visible, onClose }) => {
                 setOpen={setOpenFrequency}
                 setValue={setFrequency}
                 style={styles.dropdown}
+                onChangeValue={(value) => {
+                  if (value === 'Semi-Daily' || value === 'Weekly') {
+                    setShowCalendar(true);
+                  } else {
+                    setShowCalendar(false);
+                  }
+                }}
                 dropDownContainerStyle={{
                   borderColor: '#ccc',
                   borderRadius: 12,
@@ -78,9 +131,21 @@ const HabitCreationModal = ({ visible, onClose }) => {
                 }}
               />
 
+              {showCalendar && (
+                <View style={{ borderWidth: 1, borderRadius: 10, borderColor: "lightgrey" }}>
+                  <Calendar
+                    onDayPress={toggleDateSelection}
+                    markedDates={selectedDates}
+                  />
+                </View>
+
+              )}
+
               <Text style={styles.label}>Reminder Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.input1}>
-                <Text>{reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}</Text>
+                <Text>
+                  {reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
+                </Text>
               </TouchableOpacity>
 
               {showTimePicker && Platform.OS === 'ios' && (
@@ -107,28 +172,26 @@ const HabitCreationModal = ({ visible, onClose }) => {
               )}
 
               {showTimePicker && Platform.OS === 'android' && (
-                <DateTimePicker
-                  value={reminderTime}
+                <DatePicker
+                  modal
+                  open={true}
                   mode="time"
-                  display="default"
-                  onChange={(event, selectedTime) => {
-                    setShowTimePicker(false);
-                    if (selectedTime) {
-                      setReminderTime(selectedTime);
-                    }
-                  }}
+                  theme='light'
+                  is24hourSource={'locale'}
+                  minuteInterval={30}
+                  textColor={"black"}
+                  date={new Date()}
+                  onConfirm={handleConfirmTime}
+                // onCancel={hideTimePicker}
                 />
+
               )}
 
               <Text style={styles.label}>Timezone</Text>
               <DropDownPicker
                 open={openTimezone}
                 value={timezone}
-                items={[
-                  { label: 'Asia/Karachi', value: 'Asia/Karachi' },
-                  { label: 'America/New_York', value: 'America/New_York' },
-                  { label: 'Europe/London', value: 'Europe/London' }
-                ]}
+                items={timezoneItems}
                 dropDownDirection='TOP'
                 setOpen={setOpenTimezone}
                 setValue={setTimezone}
@@ -144,8 +207,8 @@ const HabitCreationModal = ({ visible, onClose }) => {
                 }}
               />
 
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Create Habit</Text>
+              <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
+                <Text style={styles.buttonText}>{selectedHabit ? "Update Habit" : "Create Habit"}</Text>
               </TouchableOpacity>
             </ScrollView>
           </KeyboardAvoidingView>
