@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 20,
     paddingHorizontal: 20,
-    paddingTop:20
+    paddingTop: 20
   },
   logo: {
     fontSize: 18,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   cardValue: {
     fontSize: 22,
     fontWeight: "bold",
-    paddingTop:10
+    paddingTop: 10
   },
   cardSubtitle: {
     fontSize: 12,
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#3565D0",
     marginBottom: 10,
-    paddingLeft:20
+    paddingLeft: 20
   },
   card: {
     backgroundColor: "white",
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "rgb(53,101,208)",
     marginBottom: 10,
-    paddingLeft:20
+    paddingLeft: 20
   },
   cardTitle: {
     fontSize: 16,
@@ -239,8 +239,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loaderContainer: {
-    alignItems:'center',
-    justifyContent:'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     position: "absolute",
     top: 0,
     left: 0,
@@ -249,53 +249,89 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
+    fontWeight: 'bold',
+    color: '#333',
   },
   subHeaderText: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 15,
+    color: '#777',
+    marginBottom: 10,
   },
   section: {
-    marginVertical: 5,
-    paddingTop:5
-
+    marginVertical: 10,
   },
   sectionHeading: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#4A90E2",
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  sectionText: {
+    fontSize: 14,
+    color: '#555',
   },
   rowContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingTop:5
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  column: {
+    flex: 1,
+    paddingHorizontal: 5,
   },
   positiveText: {
-    color: "green",
+    color: 'green',
   },
   negativeText: {
-    color: "orange",
+    color: 'orange',
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  listText: {
+    fontSize: 14,
+    marginLeft: 8,
+    color: '#555',
   },
   divider: {
     height: 1,
-    backgroundColor: "#ddd",
-    width: "100%",
+    backgroundColor: 'lightgrey',
     marginVertical: 10,
   },
+  scoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   consistencyLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-    marginTop: 10,
+    fontSize: 14,
+    fontWeight: '600',
   },
   scoreText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'blue',
+  },
+  progressBar: {
+    marginTop: 10,
+    borderRadius: 10,
+  },
+  cardTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#4A90E2",
-    marginTop: 5,
+    fontWeight: 'bold',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 10,
+  },
+  noHabitContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  noHabitText: {
+    fontSize: 14,
+    color: '#777',
   },
 });
 

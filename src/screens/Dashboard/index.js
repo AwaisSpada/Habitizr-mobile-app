@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator, FlatList } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Feather from 'react-native-vector-icons/Feather'
 import HabitCreationModal from "../../components/HabitCreationModal";
@@ -9,6 +9,7 @@ import { logoutUser, getHabits, newCreateHabit, deleteHabit, editHabit, habitIns
 import { showMessage } from "react-native-flash-message";
 import { AuthContext } from '../../context/AuthContext';
 import * as Progress from "react-native-progress";
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import styles from "./styles";
 
 const Dashboard = (props) => {
@@ -110,7 +111,6 @@ const Dashboard = (props) => {
     }
   };
 
-
   const updateHabit = async (habitObject) => {
     const selectedDatesArray = habitObject.selectedDates
 
@@ -145,24 +145,23 @@ const Dashboard = (props) => {
   };
 
   const handleEditHabit = (habit) => {
-    console.log('handleEditHabit', habit)
     setSelectedHabit(habit);
     setModalVisible(true);
   };
 
   const handleDeleteHabit = async (habitToDelete) => {
-
+    setHabits((prevHabits) => prevHabits.filter(habit => habit.id !== habitToDelete.id));
     try {
       const result = await deleteHabit(habitToDelete.id);
       console.log('check handleDeleteHabit', result)
       if (result) {
         showMessage({ message: "Success", description: 'Habit Deleted successfully', type: "success" });
         setSelectedHabit(null)
-        await fetchHabits()
+        // await fetchHabits()
       }
     } catch (error) {
       console.error("Error deleted habit:", error.message);
-      showMessage({ message: "Error", description: 'Failed to delete habit', type: "danger" });
+      // showMessage({ message: "Error", description: 'Failed to delete habit', type: "danger" });
     }
   };
 
@@ -359,29 +358,71 @@ const Dashboard = (props) => {
           insights ?
             <View style={styles.card}>
               <Text style={styles.headerText}>AI-Powered Habit Insights</Text>
-              <Text style={styles.subHeaderText}>Analysis and suggestions for "{habits[0].name}"</Text>
+              <Text style={styles.subHeaderText}>Analysis and suggestions for "{habits[0]?.name}"</Text>
 
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>Summary</Text>
+                <Text style={styles.sectionText}>{insights?.summary}</Text>
               </View>
 
               <View style={styles.rowContainer}>
-                <Text style={[styles.sectionHeading, styles.positiveText]}>Strengths</Text>
-                <Text style={[styles.sectionHeading, styles.negativeText]}>Areas for Improvement</Text>
+                <View style={styles.column}>
+                  <Text style={[styles.sectionHeading, styles.positiveText]}>Strengths</Text>
+                  <FlatList
+                    data={insights?.strengths || []}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <View style={styles.listItem}>
+                        <FontAwesomeIcon name="check-circle" size={20} color="green" />
+                        <Text style={styles.listText}>{item}</Text>
+                      </View>
+                    )}
+                  />
+                </View>
+
+                <View style={styles.column}>
+                  <Text style={[styles.sectionHeading, styles.negativeText]}>Areas for Improvement</Text>
+                  <FlatList
+                    data={insights?.improvements || []}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <View style={styles.listItem}>
+                        <FontAwesomeIcon name="bullseye" size={20} color="orange" />
+                        <Text style={styles.listText}>{item}</Text>
+                      </View>
+                    )}
+                  />
+                </View>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionHeading}>Suggestions</Text>
+                <FlatList
+                  data={insights?.suggestions || []}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <View style={styles.listItem}>
+                      <FontAwesomeIcon name="star" size={20} color="blue" />
+                      <Text style={styles.listText}>{item}</Text>
+                    </View>
+                  )}
+                />
               </View>
 
               <View style={styles.divider} />
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View style={styles.scoreContainer}>
                 <Text style={styles.consistencyLabel}>Consistency Score</Text>
-                <Text style={styles.scoreText}>0%</Text>
+                <Text style={styles.scoreText}>{insights?.consistency_score}%</Text>
               </View>
 
-
-              <Progress.Bar unfilledColor='lightgrey' borderColor='lightgrey' progress={0 / 100} width={300} style={{ top: 10, padding: 2, borderRadius: 10 }} />
+              <Progress.Bar
+                progress={insights?.consistency_score / 100}
+                width={300}
+                color="blue"
+                unfilledColor="lightgrey"
+                borderColor="lightgrey"
+                style={styles.progressBar}
+              />
             </View>
             :
             <View style={styles.card}>
