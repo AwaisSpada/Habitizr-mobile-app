@@ -12,7 +12,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   const [habitName, setHabitName] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('Daily');
-  const [reminderTime, setReminderTime] = useState(new Date());
+  const [reminderTime, setReminderTime] = useState();
   const [timezone, setTimezone] = useState('Asia/Karachi');
   const [openFrequency, setOpenFrequency] = useState(false);
   const [openTimezone, setOpenTimezone] = useState(false);
@@ -20,7 +20,9 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDates, setSelectedDates] = useState({});
   const [timezoneItems, setTimezoneItems] = useState([]);
+  const [time, setTime] = useState(new Date());
 
+  console.log('check the date ', time)
   const moment = require('moment-timezone');
 
   useEffect(() => {
@@ -29,12 +31,11 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   }, []);
 
   useEffect(() => {
-    // Update modal fields when editing an existing habit
     if (selectedHabit) {
       setHabitName(selectedHabit.name || '');
       setDescription(selectedHabit.description || '');
       setFrequency(habit.selectedHabit || 'Daily');
-      setReminderTime(selectedHabit.reminderTime ? new Date(selectedHabit.reminderTime) : new Date());
+      // setReminderTime(selectedHabit.reminderTime ? new Date(selectedHabit.reminderTime) : new Date());
       setTimezone(selectedHabit.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
   }, [selectedHabit]);
@@ -60,12 +61,6 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
 
       return updatedDates;
     });
-  };
-
-  const handleConfirmTime = date => {
-    console.log('check handleConfirmTime', date)
-    setReminderTime(date);
-    // setOpenTimePicker(false);
   };
 
   return (
@@ -144,7 +139,8 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
               <Text style={styles.label}>Reminder Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.input1}>
                 <Text>
-                  {reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
+                  {/* {reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'} */}
+                  {time ? time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
                 </Text>
               </TouchableOpacity>
 
@@ -160,11 +156,16 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                       </TouchableOpacity>
                     </View>
                     <DateTimePicker
-                      value={reminderTime}
+                      value={time}
                       mode="time"
                       display="spinner"
                       onChange={(event, selectedTime) => {
-                        if (selectedTime) setReminderTime(selectedTime);
+                        setShowTimePicker(false);
+                        if (selectedTime) {
+                          setTime(selectedTime);
+                          setReminderTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                        }
+
                       }}
                     />
                   </View>
@@ -172,21 +173,19 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
               )}
 
               {showTimePicker && Platform.OS === 'android' && (
-                <DatePicker
-                  modal
-                  open={true}
+                <DateTimePicker
+                  value={time}
                   mode="time"
-                  theme='light'
-                  is24hourSource={'locale'}
-                  minuteInterval={30}
-                  textColor={"black"}
-                  date={new Date()}
-                  onConfirm={handleConfirmTime}
-                // onCancel={hideTimePicker}
+                  display="spinner"
+                  onChange={(event, selectedTime) => {
+                    setShowTimePicker(false);
+                    if (selectedTime) {
+                      setTime(selectedTime);
+                      setReminderTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                    }
+                  }}
                 />
-
               )}
-
               <Text style={styles.label}>Timezone</Text>
               <DropDownPicker
                 open={openTimezone}

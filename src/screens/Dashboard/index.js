@@ -86,18 +86,26 @@ const Dashboard = (props) => {
     setSelectedHabit(null);
   };
 
-  const CreateNewHabit = async (habitObject) => {
+  const CreateNewHabit = async (habitData) => {
 
-    const selectedDatesArray = habitObject.selectedDates
+    let habitObject = {
+      name: habitData.habitName,
+      description: habitData.description,
+      frequency: habitData.frequency,
+      reminderTime: habitData.reminderTime,
+      timezone: habitData.timezone
+    }
+
+    const selectedDatesArray = habitData.selectedDates
 
     const datesArray = Object.keys(selectedDatesArray);
-
-    console.log('datesArray', habitObject)
 
     const formattedData = {
       ...habitObject,
       selectedDays: datesArray.map(date => new Date(date).getDay()), // Convert to weekday numbers
     };
+
+    console.log('formattedData', formattedData)
 
     try {
       const result = await newCreateHabit(formattedData);
@@ -111,8 +119,17 @@ const Dashboard = (props) => {
     }
   };
 
-  const updateHabit = async (habitObject) => {
-    const selectedDatesArray = habitObject.selectedDates
+  const updateHabit = async (updatedHabit) => {
+
+    let habitObject = {
+      name: updatedHabit.habitName,
+      description: updatedHabit.description,
+      frequency: updatedHabit.frequency,
+      reminderTime: updatedHabit.reminderTime,
+      timezone: updatedHabit.timezone
+    }
+
+    const selectedDatesArray = updatedHabit.selectedDates
 
     const datesArray = Object.keys(selectedDatesArray);
 

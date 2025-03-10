@@ -14,7 +14,7 @@
 //     <NavigationContainer>
 //       <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
 //         <Stack.Screen name="Splash" component={SplashScreen} />
-//         <Stack.Screen name="Login" component={LoginScreen} />
+//         {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
 //         <Stack.Screen name="Dashboard" component={DashboardScreen} />
 //         <Stack.Screen name="Profile" component={ProfileScreen} />
 //         <Stack.Screen name="HabitInfo" component={HabitInfoScreen} />

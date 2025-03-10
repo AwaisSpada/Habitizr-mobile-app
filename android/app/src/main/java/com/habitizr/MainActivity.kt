@@ -1,4 +1,4 @@
-package com.habitizr
+package com.habitizr.habitizr
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

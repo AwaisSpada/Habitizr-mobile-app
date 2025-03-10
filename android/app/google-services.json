@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "557005901423",
+    "project_id": "habitizr",
+    "storage_bucket": "habitizr.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557005901423:android:6196bd5dc7f4ec7731c79a",
+        "android_client_info": {
+          "package_name": "com.habitizr.habitizr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoxjus5YCcq-R8IaYIIlaiFxxvehmOEAg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
