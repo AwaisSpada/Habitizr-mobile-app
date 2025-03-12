@@ -290,21 +290,28 @@ export const updateProfile = async ({ phoneNumber, currentPassword, newPassword 
 export const deleteHabit = async (habitId) => {
     try {
         const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
         });
-
+    
         if (!response.ok) {
-            throw new Error("Failed to update habit");
+          const text = await response.text();
+          let errorData;
+          try {
+            errorData = text ? JSON.parse(text) : {};
+          } catch {
+            errorData = { message: text || 'Failed to delete habit' };
+          }
+          throw new Error(errorData.message || 'Failed to delete habit');
         }
-
-        const data = await response.json();
-        console.log("Habit deleted successfully", data);
-        return data;
-    } catch (error) {
-        console.error("Error starting habit:", error.message);
-        throw new Error(error.message || "Failed to delete habit");
-    }
+            return { success: true };
+      } catch (error) {
+        Alert.alert('Error', error.message);
+        return { success: false };
+      }
     // try {
     //     await api.delete(`${ENDPOINTS.HABITS}/${habitId}`);
     //     console.log("Habit deleted successfully");
@@ -316,3 +323,43 @@ export const deleteHabit = async (habitId) => {
     //     throw new Error(errorMessage);
     // }
 };
+
+export const upgradePlans = async (plan) => {
+            try {
+                const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(plan),
+                });
+    
+                if (!response.ok) {
+                    throw new Error("Failed to create checkout session");
+                }
+    
+                const { url } = await response.json();
+                console.error("url stripe", url);
+                return url;
+            } catch (error) {
+                console.error("Error creating checkout session:", error);
+            }
+        }
+
+
+// export const sendNotification = async () => {
+//     const response = await fetch('https://habitizr.com/api/push-notification', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         fcmToken: 'fKeO4vEpQRa31NkFvrnhUe:APA91bFIcUajuvSLkYndX5WckfH-S9mcbJPe8jD3kDtKGrueV9Jpr7HdbHgeWcIw2RtJc_OX0XZ8ga4XU8lToVYg9I1UUGRPo0GAMXtvg4rZjKdPLY3iHl4',
+//         title: 'Hello World',
+//         body: 'This is a test notification',
+//       }),
+//     });
+  
+//     const result = await response.json();
+//     console.log('Notification Response:', result);
+//   };

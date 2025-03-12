@@ -1,6 +1,6 @@
-import { Alert } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 // Request Permission for Notifications
 export const requestNotificationPermission = async () => {
@@ -22,7 +22,7 @@ const getFCMToken = async () => {
     try {
       const fcmToken = await messaging().getToken();
       if (fcmToken) {
-        console.log(fcmToken, 'the new genrated token');
+        console.log(fcmToken, 'the new generated token');
         await AsyncStorage.setItem('fcmToken', fcmToken);
       }
     } catch (error) {
@@ -31,11 +31,27 @@ const getFCMToken = async () => {
   }
 };
 
+// Show Foreground Notification using Notifee
+const showForegroundNotification = async (remoteMessage) => {
+  await notifee.requestPermission();
+
+  await notifee.displayNotification({
+    title: remoteMessage.notification?.title || 'New Notification',
+    body: remoteMessage.notification?.body || 'You have a new message',
+    android: {
+      channelId: 'default',
+      importance: AndroidImportance.HIGH,
+    },
+  });
+};
+
 // Handle Foreground Notifications
 export const setupNotificationListeners = () => {
   const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
     console.log('Foreground Notification:', remoteMessage);
-    // Alert.alert(remoteMessage.notification?.title ?? "Notification", remoteMessage.notification?.body ?? "You have a new message.");
+    
+    // ✅ Show notification popup in foreground
+    await showForegroundNotification(remoteMessage);
   });
 
   // Handle Background & Quit State Notifications

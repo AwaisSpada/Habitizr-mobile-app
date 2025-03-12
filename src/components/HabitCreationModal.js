@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -8,7 +8,6 @@ import DatePicker from 'react-native-date-picker';
 import { Calendar } from 'react-native-calendars';
 
 const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }) => {
-  console.log('edit values', habit)
   const [habitName, setHabitName] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('Daily');
@@ -22,7 +21,6 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   const [timezoneItems, setTimezoneItems] = useState([]);
   const [time, setTime] = useState(new Date());
 
-  console.log('check the date ', time)
   const moment = require('moment-timezone');
 
   useEffect(() => {
@@ -40,10 +38,44 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
     }
   }, [selectedHabit]);
 
+  // const handleSubmit = () => {
+  //   if (!habitName.trim()) return;
+  //   const updatedHabit = { habitName, description, frequency, reminderTime, timezone, selectedDates };
+  //   onCreate(updatedHabit);
+  //   setHabitName('');
+  //   setDescription('');
+  // };
+
   const handleSubmit = () => {
-    if (!habitName.trim()) return;
+    if (!habitName.trim()) {
+      Alert.alert("Error", "Habit name is required");
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert("Error", "Description is required");
+      return;
+    }
+    if (!frequency) {
+      Alert.alert("Error", "Please select a frequency");
+      return;
+    }
+    if (!reminderTime) {
+      Alert.alert("Error", "Please set a reminder time");
+      return;
+    }
+    if (!timezone) {
+      Alert.alert("Error", "Please select a timezone");
+      return;
+    }
+    if (!selectedDates || selectedDates.length === 0) {
+      Alert.alert("Error", "Please select at least one date");
+      return;
+    }
+  
     const updatedHabit = { habitName, description, frequency, reminderTime, timezone, selectedDates };
     onCreate(updatedHabit);
+    
+    // Reset form fields after submission
     setHabitName('');
     setDescription('');
   };

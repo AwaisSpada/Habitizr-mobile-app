@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator, FlatList } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator, FlatList, Alert, AppState } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Feather from 'react-native-vector-icons/Feather'
 import HabitCreationModal from "../../components/HabitCreationModal";
@@ -10,6 +10,8 @@ import { showMessage } from "react-native-flash-message";
 import { AuthContext } from '../../context/AuthContext';
 import * as Progress from "react-native-progress";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { useStripe, CardField, confirmPayment } from '@stripe/stripe-react-native';
+import SubscriptionComparison from '../../components/SubscriptionComparison'
 import styles from "./styles";
 
 const Dashboard = (props) => {
@@ -20,6 +22,9 @@ const Dashboard = (props) => {
   const [loading, setLoading] = useState(false);
   const [habitsData, sethabitsData] = useState([])
   const [insights, setInsights] = useState()
+  const [visible, setVisible] = useState(false);
+
+  const { confirmPayment } = useStripe();
 
   const { logout } = useContext(AuthContext);
 
@@ -177,7 +182,7 @@ const Dashboard = (props) => {
         // await fetchHabits()
       }
     } catch (error) {
-      console.error("Error deleted habit:", error.message);
+      console.error("Error deleted habit:", error);
       // showMessage({ message: "Error", description: 'Failed to delete habit', type: "danger" });
     }
   };
@@ -253,6 +258,35 @@ const Dashboard = (props) => {
     }
   }
 
+  const handlePayment = async () => {
+    // setLoading(true);
+    // try {
+    //   // const response = await fetch('http://your-backend.com/create-payment-intent', {
+    //   //   method: 'POST',
+    //   //   headers: { 'Content-Type': 'application/json' },
+    //   //   body: JSON.stringify({ amount: 1000, currency: 'usd' }), // Amount in cents (10.00 USD)
+    //   // });
+
+    //   // const { clientSecret } = await response.json();
+
+    //   const { error, paymentIntent } = await confirmPayment('sk_test_51IEPC9JKwzZ1wTvdOkmsoXWIew9laf5StIv4oMQbGhA2i64UaFoXrY1dyMJCUAfH15W9Njlv6lC9RcyB95yyCoUW002uOohpW3', {
+    //     paymentMethodType: 'Card',
+    //   });
+
+    //   if (error) {
+    //     Alert.alert('Payment failed', error.message);
+    //   } else {
+    //     Alert.alert('Success', 'Payment completed successfully');
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    // } finally {
+    //   setLoading(false);
+    // }
+    setVisible(true)
+  };
+
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       {loading && (
@@ -263,7 +297,7 @@ const Dashboard = (props) => {
       {/* Fixed Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>habitizr</Text>
-        <TouchableOpacity style={styles.upgradeButton}>
+        <TouchableOpacity style={styles.upgradeButton} onPress={handlePayment}>
           <Icon name="crown" size={16} color="white" />
           <Text style={styles.upgradeText}> Upgrade to Trailblazer</Text>
         </TouchableOpacity>
@@ -474,6 +508,19 @@ const Dashboard = (props) => {
           isLoading={loading}
         />
       )}
+      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)}/>
+
+      {/* <CardField
+        postalCodeEnabled={true}
+        placeholder={{ number: '4242 4242 4242 4242' }}
+        onCardChange={(card) => setCardDetails(card)}
+        style={{ height: 50, marginVertical: 20 }}
+      />
+      <TouchableOpacity onPress={handlePayment} disabled={loading}>
+        <Text>Pay Now</Text>
+      </TouchableOpacity> */}
+
+
     </SafeAreaView>
   );
 };

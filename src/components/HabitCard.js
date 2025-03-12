@@ -66,6 +66,8 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
           </View>
           <Text style={styles.valueText}>{habit.frequency}</Text>
 
+        </View>
+        <View>
           {habit.selectedDays && habit.selectedDays.length > 0 && (
             <View style={styles.detailRow}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -181,7 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     textTransform: "capitalize",
-    width:100
+    width: 100
   },
   actions: {
     flexDirection: "row",
@@ -220,7 +222,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 20,
   },
-  stopButton:{
+  stopButton: {
     flexDirection: "row",
     alignItems: "center",
     borderColor: "orange",
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 6,
   },
-  stopButtonText:{
+  stopButtonText: {
     color: "orange",
     fontSize: 16,
     marginLeft: 6,
