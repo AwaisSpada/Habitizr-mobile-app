@@ -324,7 +324,8 @@ export const deleteHabit = async (habitId) => {
     // }
 };
 
-export const upgradePlans = async (plan) => {
+    export const upgradePlans = async (plan) => {
+            console.log('body', plan)
             try {
                 const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
                     method: "POST",
@@ -333,7 +334,8 @@ export const upgradePlans = async (plan) => {
                     },
                     body: JSON.stringify(plan),
                 });
-    
+                console.log("stripe response", response);
+
                 if (!response.ok) {
                     throw new Error("Failed to create checkout session");
                 }

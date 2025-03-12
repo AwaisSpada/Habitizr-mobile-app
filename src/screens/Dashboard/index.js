@@ -23,6 +23,9 @@ const Dashboard = (props) => {
   const [habitsData, sethabitsData] = useState([])
   const [insights, setInsights] = useState()
   const [visible, setVisible] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const { confirmPayment } = useStripe();
 
@@ -286,6 +289,42 @@ const Dashboard = (props) => {
     setVisible(true)
   };
 
+    // Fetch the client secret from the backend
+    const fetchPaymentIntent = async () => {
+      try {
+        const response = await fetch('http://your-backend.com/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: 5000, currency: 'usd' }),
+        });
+  
+        const { clientSecret } = await response.json();
+        setClientSecret(clientSecret);
+        return clientSecret;
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
+    };
+  
+    // Initialize and Present Payment Sheet
+    const openPaymentSheet = async () => {
+      const secret = await fetchPaymentIntent();
+      if (!secret) return;
+  
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: secret,
+      });
+  
+      if (!error) {
+        const { error: paymentError } = await presentPaymentSheet();
+        if (paymentError) {
+          Alert.alert('Payment Failed', paymentError.message);
+        } else {
+          Alert.alert('Success', 'Payment completed!');
+        }
+      }
+    };
+
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -486,10 +525,10 @@ const Dashboard = (props) => {
             </View>
         }
 
-        <TouchableOpacity style={styles.reportButton}>
+        {/* <TouchableOpacity style={styles.reportButton}>
           <Icon name="alert-circle-outline" size={16} color="#6C7C9B" />
           <Text style={styles.reportText}> Report a Problem</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
       {modalVisible ?
         <HabitCreationModal
@@ -515,10 +554,10 @@ const Dashboard = (props) => {
         placeholder={{ number: '4242 4242 4242 4242' }}
         onCardChange={(card) => setCardDetails(card)}
         style={{ height: 50, marginVertical: 20 }}
-      />
-      <TouchableOpacity onPress={handlePayment} disabled={loading}>
+      /> */}
+      <TouchableOpacity onPress={openPaymentSheet} disabled={loading}>
         <Text>Pay Now</Text>
-      </TouchableOpacity> */}
+      </TouchableOpacity>
 
 
     </SafeAreaView>

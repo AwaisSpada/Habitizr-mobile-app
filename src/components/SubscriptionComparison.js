@@ -349,6 +349,7 @@ const SubscriptionComparison = ({ visible, onClose }) => {
         let plan = {
             packageType: TIERS.TRAILBLAZER,
         }
+
         const response = await upgradePlans(plan)
 
         if (response) {
@@ -356,7 +357,6 @@ const SubscriptionComparison = ({ visible, onClose }) => {
         } else {
             throw new Error('No checkout URL received');
         }
-        console.log('check response', response)
     };
 
     return (
