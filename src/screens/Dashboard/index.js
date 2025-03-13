@@ -10,7 +10,6 @@ import { showMessage } from "react-native-flash-message";
 import { AuthContext } from '../../context/AuthContext';
 import * as Progress from "react-native-progress";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { useStripe, CardField, confirmPayment } from '@stripe/stripe-react-native';
 import SubscriptionComparison from '../../components/SubscriptionComparison'
 import styles from "./styles";
 
@@ -20,14 +19,8 @@ const Dashboard = (props) => {
   const [selectedHabit, setSelectedHabit] = useState(null);
   const [phoneModalVisible, setPhoneModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [habitsData, sethabitsData] = useState([])
   const [insights, setInsights] = useState()
   const [visible, setVisible] = useState(false);
-  const [clientSecret, setClientSecret] = useState('');
-
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-
-  const { confirmPayment } = useStripe();
 
   const { logout } = useContext(AuthContext);
 
@@ -77,9 +70,7 @@ const Dashboard = (props) => {
   }
 
   const handleCreateHabit = async (newHabit) => {
-    console.log('newHabit', newHabit)
     if (selectedHabit) {
-      console.log('update habit', newHabit)
       updateHabit(newHabit)
       // Edit existing habit
       // setHabits(habits.map(h => (h === selectedHabit ? newHabit : h)));
@@ -262,69 +253,8 @@ const Dashboard = (props) => {
   }
 
   const handlePayment = async () => {
-    // setLoading(true);
-    // try {
-    //   // const response = await fetch('http://your-backend.com/create-payment-intent', {
-    //   //   method: 'POST',
-    //   //   headers: { 'Content-Type': 'application/json' },
-    //   //   body: JSON.stringify({ amount: 1000, currency: 'usd' }), // Amount in cents (10.00 USD)
-    //   // });
-
-    //   // const { clientSecret } = await response.json();
-
-    //   const { error, paymentIntent } = await confirmPayment('sk_test_51IEPC9JKwzZ1wTvdOkmsoXWIew9laf5StIv4oMQbGhA2i64UaFoXrY1dyMJCUAfH15W9Njlv6lC9RcyB95yyCoUW002uOohpW3', {
-    //     paymentMethodType: 'Card',
-    //   });
-
-    //   if (error) {
-    //     Alert.alert('Payment failed', error.message);
-    //   } else {
-    //     Alert.alert('Success', 'Payment completed successfully');
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    // } finally {
-    //   setLoading(false);
-    // }
     setVisible(true)
   };
-
-    // Fetch the client secret from the backend
-    const fetchPaymentIntent = async () => {
-      try {
-        const response = await fetch('http://your-backend.com/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: 5000, currency: 'usd' }),
-        });
-  
-        const { clientSecret } = await response.json();
-        setClientSecret(clientSecret);
-        return clientSecret;
-      } catch (error) {
-        Alert.alert('Error', error.message);
-      }
-    };
-  
-    // Initialize and Present Payment Sheet
-    const openPaymentSheet = async () => {
-      const secret = await fetchPaymentIntent();
-      if (!secret) return;
-  
-      const { error } = await initPaymentSheet({
-        paymentIntentClientSecret: secret,
-      });
-  
-      if (!error) {
-        const { error: paymentError } = await presentPaymentSheet();
-        if (paymentError) {
-          Alert.alert('Payment Failed', paymentError.message);
-        } else {
-          Alert.alert('Success', 'Payment completed!');
-        }
-      }
-    };
-
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -547,19 +477,7 @@ const Dashboard = (props) => {
           isLoading={loading}
         />
       )}
-      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)}/>
-
-      {/* <CardField
-        postalCodeEnabled={true}
-        placeholder={{ number: '4242 4242 4242 4242' }}
-        onCardChange={(card) => setCardDetails(card)}
-        style={{ height: 50, marginVertical: 20 }}
-      /> */}
-      <TouchableOpacity onPress={openPaymentSheet} disabled={loading}>
-        <Text>Pay Now</Text>
-      </TouchableOpacity>
-
-
+      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)} />
     </SafeAreaView>
   );
 };

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Modal } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
-import { fetchUser, updateProfile } from '../../config/authService';
+import { fetchUser, updateProfile, cancelSubscription, sendNotification } from '../../config/authService';
 import tiers from "../../lib/tiers";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import FlashMessage, { showMessage } from "react-native-flash-message";
+import SubscriptionComparison from '../../components/SubscriptionComparison'
+import CancelSubscriptionDialog from '../../components/CancelSubscription'
 import styles from './styles';
 
 const ProfileScreen = () => {
@@ -18,6 +20,7 @@ const ProfileScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const navigation = useNavigation();
   const { TIERS, PRICING_TIERS, isWithinTrialPeriod } = tiers;
@@ -25,6 +28,12 @@ const ProfileScreen = () => {
   useEffect(() => {
     getUser();
   }, []);
+
+  useEffect(() => {
+    if (isTrialExpired) {
+      setIsUpgrading(true); // Show modal if trial expired
+    }
+  }, [isTrialExpired]);
 
   const getUser = async () => {
     try {
@@ -71,10 +80,10 @@ const ProfileScreen = () => {
       return;
     }
 
-    // if (!isValidPhoneNumber(phoneNumber)) {
-    //   showMessage({ message: "Error", description:'Enter a valid phone number (10-15 digits).', type: "danger" });
-    //   return;
-    // }
+    if (phoneNumber === '') {
+      showMessage({ message: "Error", description:'Enter a valid phone number', type: "danger" });
+      return;
+    }
 
     setIsLoading(true);
 
@@ -114,12 +123,40 @@ const ProfileScreen = () => {
   const handleUpgrade = async () => {
     setIsUpgrading(true);
     // Implement upgrade logic here
-    setIsUpgrading(false);
   };
 
   const handleCancelSubscription = async () => {
-    // Implement cancel subscription logic here
+    setIsLoading(true)
+    try {
+      const response = await cancelSubscription(); // Fix: Call correct API
+      console.log('cancelSubscription response:', response); // Debugging log
+
+      if (response.success) {
+        showMessage({
+          message: 'Success',
+          description: 'Your subscription has been canceled. You will have access until the end of your billing period.',
+          type: "success"
+        });
+      } else {
+        showMessage({
+          message: 'Error',
+          description: response.message || 'Failed to cancel subscription.',
+          type: "danger"
+        });
+      }
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      showMessage({
+        message: 'Error',
+        description: error.message || 'An error occurred while canceling subscription.',
+        type: "danger"
+      });
+    } finally {
+      setIsLoading(false)
+      setVisible(false);
+    }
   };
+
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -167,7 +204,7 @@ const ProfileScreen = () => {
                   <Text style={styles.upgradeText}>{isUpgrading ? 'Upgrading...' : 'Upgrade to Trailblazer'}</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={styles.cancelButton} onPress={handleCancelSubscription}>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setVisible(true)}>
                   <Text style={styles.cancelText}>Cancel Subscription</Text>
                 </TouchableOpacity>
               )}
@@ -266,6 +303,13 @@ const ProfileScreen = () => {
           </Modal>
         </View>
       </ScrollView>
+      <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} />
+      <CancelSubscriptionDialog
+        visible={visible}
+        onClose={() => setVisible(false)}
+        onCancel={() => handleCancelSubscription()}
+        loading={isLoading}
+      />
     </SafeAreaView>
   );
 };

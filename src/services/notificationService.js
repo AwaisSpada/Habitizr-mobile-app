@@ -1,19 +1,46 @@
+import { PermissionsAndroid, Permission, Platform, Linking } from 'react-native'
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import DeviceInfo from 'react-native-device-info';
 
 // Request Permission for Notifications
 export const requestNotificationPermission = async () => {
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  if (Platform.OS == "android") {
+    let apiLevel = await DeviceInfo.getApiLevel();
+    if (apiLevel >= 33) await PermissionsAndroid.request("android.permission.POST_NOTIFICATIONS").then(res => console.log("PERMISSION RESPONSESEE:  ", res));
+    return getFCMToken();
+  }
+  else if (Platform.OS == "ios") {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-  if (enabled) {
-    console.log('Notification permission granted.');
-    await getFCMToken();
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+      return getFCMToken()
+    }
+    else {
+      return requestPermission();
+    }
   }
 };
+
+const requestPermission = async () => {
+  try {
+    const authorizationStatus = await messaging().requestPermission();
+
+    if (authorizationStatus) {
+      return getFCMToken();
+    }
+    else {
+      return getFCMToken();
+    }
+  } catch (error) {
+    console.log('permission rejected');
+  }
+}
 
 const getFCMToken = async () => {
   let fcmToken = await AsyncStorage.getItem('fcmToken');
@@ -49,7 +76,7 @@ const showForegroundNotification = async (remoteMessage) => {
 export const setupNotificationListeners = () => {
   const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
     console.log('Foreground Notification:', remoteMessage);
-    
+
     // ✅ Show notification popup in foreground
     await showForegroundNotification(remoteMessage);
   });

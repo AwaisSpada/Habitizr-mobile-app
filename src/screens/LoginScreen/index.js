@@ -77,7 +77,6 @@ const LoginScreen = (props) => {
       const response = isLogin
         ? await loginUser({ username, password })
         : await registerUser({ username, email, password });
-      console.log('register response', response)
       showMessage({
         message: 'Success',
         description: isLogin ? "Login Successful!" : "Registration Successful!",

@@ -12,7 +12,7 @@ export const registerUser = async ({ username, email, password }) => {
             tosAccepted: false,
         });
         showMessage({
-            message:'Success',
+            message: 'Success',
             description: "Registration successful!",
             type: "success",
         });
@@ -22,7 +22,7 @@ export const registerUser = async ({ username, email, password }) => {
         const errorMessage = error.response?.data?.message || "Registration failed";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -38,7 +38,7 @@ export const loginUser = async ({ username, password }) => {
         console.log('checek login response', response)
 
         showMessage({
-            message:'Success',
+            message: 'Success',
             description: "Login successful!",
             type: "success",
         });
@@ -48,7 +48,7 @@ export const loginUser = async ({ username, password }) => {
         const errorMessage = error.response?.data?.message || "Login failed";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -69,7 +69,7 @@ export const logoutUser = async () => {
         const errorMessage = error.response?.data?.message || "Login failed";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -125,7 +125,7 @@ export const getHabits = async () => {
         const errorMessage = error.response?.data?.message || "Failed to fetch habits";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -145,7 +145,7 @@ export const fetchUser = async () => {
         const errorMessage = error.response?.data?.message || "Unable to fetch user";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -163,7 +163,7 @@ export const newCreateHabit = async (habit) => {
         const errorMessage = error.response?.data?.message || "Failed to Create Habit";
 
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -264,20 +264,149 @@ export const editHabit = async (habitId, habit) => {
 };
 
 // ✅ Update User Profile
-export const updateProfile = async ({ phoneNumber, currentPassword, newPassword }) => {
-    console.log('phoneNumber, currentPassword, newPassword', phoneNumber, currentPassword, newPassword)
+// export const updateProfile = async (data) => {
+//     console.log('Received data:', data);
+
+//     // Check if data is undefined or missing required properties
+//     if (!data || !data.phoneNumber || !data.currentPassword || !data.newPassword) {
+//         console.error('Error: Missing required fields', data);
+//         return;
+//     }
+
+//     const { phoneNumber, currentPassword, newPassword } = data;
+
+//     const url = `${api.defaults.baseURL}${ENDPOINTS.UPDATE_PROFILE}`;
+//     console.log('API URL:', url);
+//     console.log('Request Data:', { phoneNumber, currentPassword, newPassword });
+
+//     try {
+//         const response = await api.post(ENDPOINTS.UPDATE_PROFILE, {
+//             phoneNumber,
+//             currentPassword,
+//             newPassword,
+//         });
+
+//         console.log('Response:', response.data);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error Response:', error.response);
+
+//         const errorMessage = error.response?.data?.message || "Failed to update profile";
+//         showMessage({
+//             message: 'Error',
+//             description: errorMessage,
+//             type: "danger",
+//         });
+
+//         throw errorMessage;
+//     }
+// };
+
+
+
+// ✅ Delete Habit
+export const deleteHabit = async (habitId) => {
     try {
-        const response = await api.post(ENDPOINTS.UPDATE_PROFILE, {
-            phoneNumber,
-            currentPassword,
-            newPassword,
+        const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
         });
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorData;
+            try {
+                errorData = text ? JSON.parse(text) : {};
+            } catch {
+                errorData = { message: text || 'Failed to delete habit' };
+            }
+            throw new Error(errorData.message || 'Failed to delete habit');
+        }
+        return { success: true };
+    } catch (error) {
+        Alert.alert('Error', error.message);
+        return { success: false };
+    }
+};
+
+export const upgradePlans = async (plan) => {
+    console.log('body', plan)
+    try {
+        const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(plan),
+        });
+        console.log("stripe response", response);
+
+        if (!response.ok) {
+            throw new Error("Failed to create checkout session");
+        }
+
+        const { url } = await response.json();
+        console.error("url stripe", url);
+        return url;
+    } catch (error) {
+        console.error("Error creating checkout session:", error);
+    }
+}
+
+export const paymentStripe = async (plan) => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/get-client-secret`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(plan),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+        }
+
+        const rawText = await response.text(); // Get raw text response
+        console.log("Raw Response:", rawText);
+
+        const data = JSON.parse(rawText); // Manually parse JSON
+        console.log("Client Secret:", data.clientSecret);
+
+        return data.clientSecret;
+    } catch (error) {
+        console.error("Error in Stripe Payment:", error.message);
+    }
+};
+
+export const updateProfile = async (data) => {
+    console.log('Received data:', data);
+    const { phoneNumber, currentPassword, newPassword } = data;
+
+    const url = `${api.defaults.baseURL}${ENDPOINTS.UPDATE_PROFILE}`;
+    console.log('API URL:', url);
+    console.log('Request Data:', { phoneNumber, currentPassword, newPassword });
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/user/update-profile`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: data,
+        });
+
+        console.log('Response:', response);
         return response.data;
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Failed to update profile";
+        console.error('Error Response:', error.response);
 
+        const errorMessage = error.response?.data?.message || "Failed to update profile";
         showMessage({
-            message:'Error',
+            message: 'Error',
             description: errorMessage,
             type: "danger",
         });
@@ -286,82 +415,38 @@ export const updateProfile = async ({ phoneNumber, currentPassword, newPassword 
     }
 };
 
-// ✅ Delete Habit
-export const deleteHabit = async (habitId) => {
-    try {
-        const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
-          method: 'DELETE',
-          headers: {
-            'Accept': 'application/json',
+export const sendNotification = async () => {
+    const response = await fetch('https://habitizr.com/api/push-notification', {
+        method: 'POST',
+        headers: {
             'Content-Type': 'application/json',
-          }
-        });
-    
-        if (!response.ok) {
-          const text = await response.text();
-          let errorData;
-          try {
-            errorData = text ? JSON.parse(text) : {};
-          } catch {
-            errorData = { message: text || 'Failed to delete habit' };
-          }
-          throw new Error(errorData.message || 'Failed to delete habit');
-        }
-            return { success: true };
-      } catch (error) {
-        Alert.alert('Error', error.message);
-        return { success: false };
-      }
-    // try {
-    //     await api.delete(`${ENDPOINTS.HABITS}/${habitId}`);
-    //     console.log("Habit deleted successfully");
-    //     return { success: true };
-    // } catch (error) {
-    //     const errorMessage =
-    //         error.response?.data?.message || "Failed to delete habit";
-    //     console.error("Error:", errorMessage);
-    //     throw new Error(errorMessage);
-    // }
+        },
+        body: JSON.stringify({
+            fcmToken: 'camXDQ4_SVum_WSwLv5yx6:APA91bFxU873h7f-KI2PrSa5mx3gAKKOVfQCodAMY_s3cS7_Eqa0Tvi1ajcBi5spRLckDtqj-VZ4Qa6CY9ZtaEjp1iQ94fMozXPjIOBNwTIspi0oVnfeQPA',
+            title: 'Hello World',
+            body: 'This is a test notification',
+        }),
+    });
+
+    const result = await response.json();
+    console.log('Notification Response:', result);
 };
 
-    export const upgradePlans = async (plan) => {
-            console.log('body', plan)
-            try {
-                const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(plan),
-                });
-                console.log("stripe response", response);
-
-                if (!response.ok) {
-                    throw new Error("Failed to create checkout session");
-                }
-    
-                const { url } = await response.json();
-                console.error("url stripe", url);
-                return url;
-            } catch (error) {
-                console.error("Error creating checkout session:", error);
-            }
+//cancel Subscription
+export const cancelSubscription = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/stripe/cancel-subscription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('check the cancel response', response)
+        if (!response.ok) {
+            throw new Error('Failed to cancel subscription');
         }
-
-
-// export const sendNotification = async () => {
-//     const response = await fetch('https://habitizr.com/api/push-notification', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         fcmToken: 'fKeO4vEpQRa31NkFvrnhUe:APA91bFIcUajuvSLkYndX5WckfH-S9mcbJPe8jD3kDtKGrueV9Jpr7HdbHgeWcIw2RtJc_OX0XZ8ga4XU8lToVYg9I1UUGRPo0GAMXtvg4rZjKdPLY3iHl4',
-//         title: 'Hello World',
-//         body: 'This is a test notification',
-//       }),
-//     });
-  
-//     const result = await response.json();
-//     console.log('Notification Response:', result);
-//   };
+        return response;
+    } catch (error) {
+        console.error('Error canceling subscription:', error);
+    }
+};

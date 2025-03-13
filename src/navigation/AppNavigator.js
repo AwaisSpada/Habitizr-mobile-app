@@ -36,6 +36,7 @@ import DashboardScreen from '../screens/Dashboard';
 import ProfileScreen from '../screens/ProfileScreen';
 import HabitInfoScreen from '../screens/HabitInfoScreen';
 import SplashScreen from '../screens/SplashScreen';
+import PaymentCheckout from '../screens/PaymentCheckout';
 
 const Stack = createStackNavigator();
 
@@ -56,6 +57,7 @@ const AppNavigator = () => {
                 {user ? (
                     <>
                         <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                        <Stack.Screen name="PaymentCheckout" component={PaymentCheckout} />
                         <Stack.Screen name="Profile" component={ProfileScreen} />
                         <Stack.Screen name="HabitInfo" component={HabitInfoScreen} />
                     </>
