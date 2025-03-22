@@ -12,7 +12,12 @@
           "package_name": "com.habitizr.habitizr"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "557005901423-93qf2ouvnhrjp82cm0us9fjmij0ek05v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDoxjus5YCcq-R8IaYIIlaiFxxvehmOEAg"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "557005901423-93qf2ouvnhrjp82cm0us9fjmij0ek05v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "557005901423-mpoc8mcoo1p00h7itrtrtks7gtciqhba.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.habitizr.habitizr"
+              }
+            }
+          ]
         }
       }
     }

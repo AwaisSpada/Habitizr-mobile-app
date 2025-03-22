@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
-import { loginUser, registerUser } from '../../config/authService';
+import { loginUser, registerUser, googleLogin } from '../../config/authService';
 import { AuthContext } from '../../context/AuthContext';
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 const LoginScreen = (props) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,11 +26,55 @@ const LoginScreen = (props) => {
 
   const { login } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      GoogleSignin.configure({
+        webClientId: '557005901423-jvr7j80apt6p06lp8dt8rrc1mgv9gtd7.apps.googleusercontent.com',
+        forceCodeForRefreshToken: true,
+        offlineAccess: true,
+      })
+    } else {
+      GoogleSignin.configure({
+        webClientId: '557005901423-jvr7j80apt6p06lp8dt8rrc1mgv9gtd7.apps.googleusercontent.com',
+        forceCodeForRefreshToken: true,
+        iosClientId: '557005901423-mpoc8mcoo1p00h7itrtrtks7gtciqhba.apps.googleusercontent.com',
+      })
+    }
+
+  }, [])
+
+  const handleGoogleLogin = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google Login Success:', userInfo);
+
+      // Ensure 'idToken' exists
+      if (!userInfo.idToken) {
+        throw new Error('No ID token received');
+      }
+
+      let response = await googleLogin(userInfo.idToken);
+      console.log('Google API Response:', response);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled the login process');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign-in is already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Play Services not available or outdated');
+      } else {
+        console.log('Google Sign-In Error:', error);
+      }
+    }
+  };
+
   const handleAuth = async () => {
     if (!username || !password || (!isLogin && !email)) {
       showMessage({
         message: "Error",
-        description:'Please fill in all fields',
+        description: 'Please fill in all fields',
         type: "danger",
       });
       return;
@@ -38,7 +83,7 @@ const LoginScreen = (props) => {
     if (username.length < 3) {
       showMessage({
         message: "Error",
-        description:'Username must be at least 3 characters',
+        description: 'Username must be at least 3 characters',
         type: "danger",
       });
       return;
@@ -47,7 +92,7 @@ const LoginScreen = (props) => {
     if (!isLogin && !/\S+@\S+\.\S+/.test(email)) {
       showMessage({
         message: "Error",
-        description:'Please enter a valid email address',
+        description: 'Please enter a valid email address',
         type: "danger",
       });
       return;
@@ -56,7 +101,7 @@ const LoginScreen = (props) => {
     if (password.length < 6) {
       showMessage({
         message: "Error",
-        description:'Password must be at least 6 characters',
+        description: 'Password must be at least 6 characters',
         type: "danger",
       });
       return;
@@ -65,7 +110,7 @@ const LoginScreen = (props) => {
     if (!isLogin && !isChecked) {
       showMessage({
         message: "Error",
-        description:'You must agree to the terms of service',
+        description: 'You must agree to the terms of service',
         type: "danger",
       });
       return;
@@ -131,7 +176,7 @@ const LoginScreen = (props) => {
           {/* Social Login Buttons */}
           <View style={{ alignItems: "center", paddingTop: 20 }}>
             <View style={styles.socialContainer}>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => handleGoogleLogin()}>
                 <Text style={styles.socialText}>G Google</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>

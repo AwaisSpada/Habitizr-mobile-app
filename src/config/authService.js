@@ -57,6 +57,33 @@ export const loginUser = async ({ username, password }) => {
     }
 };
 
+//Google Login
+// export const googleLogin = async (data) => {
+//     console.log('check token', data)
+//     try {
+//         const response = await api.post(ENDPOINTS.GOOGLE_LOGIN, {token: data });
+//         console.log('checek google login response', response)
+
+//         showMessage({
+//             message: 'Success',
+//             description: "Login successful!",
+//             type: "success",
+//         });
+
+//         return response.data;
+//     } catch (error) {
+//         console.log('checek google error', error)
+//         const errorMessage = error.response?.data?.message || "Login failed";
+
+//         showMessage({
+//             message: 'Error',
+//             description: errorMessage,
+//             type: "danger",
+//         });
+
+//         throw errorMessage;
+//     }
+// };
 
 // ✅ Logout User
 export const logoutUser = async () => {
@@ -263,47 +290,6 @@ export const editHabit = async (habitId, habit) => {
     }
 };
 
-// ✅ Update User Profile
-// export const updateProfile = async (data) => {
-//     console.log('Received data:', data);
-
-//     // Check if data is undefined or missing required properties
-//     if (!data || !data.phoneNumber || !data.currentPassword || !data.newPassword) {
-//         console.error('Error: Missing required fields', data);
-//         return;
-//     }
-
-//     const { phoneNumber, currentPassword, newPassword } = data;
-
-//     const url = `${api.defaults.baseURL}${ENDPOINTS.UPDATE_PROFILE}`;
-//     console.log('API URL:', url);
-//     console.log('Request Data:', { phoneNumber, currentPassword, newPassword });
-
-//     try {
-//         const response = await api.post(ENDPOINTS.UPDATE_PROFILE, {
-//             phoneNumber,
-//             currentPassword,
-//             newPassword,
-//         });
-
-//         console.log('Response:', response.data);
-//         return response.data;
-//     } catch (error) {
-//         console.error('Error Response:', error.response);
-
-//         const errorMessage = error.response?.data?.message || "Failed to update profile";
-//         showMessage({
-//             message: 'Error',
-//             description: errorMessage,
-//             type: "danger",
-//         });
-
-//         throw errorMessage;
-//     }
-// };
-
-
-
 // ✅ Delete Habit
 export const deleteHabit = async (habitId) => {
     try {
@@ -415,6 +401,38 @@ export const updateProfile = async (data) => {
     }
 };
 
+export const googleLogin = async (data) => {
+    const requestBody = JSON.stringify({ token: data });
+    console.log('Request Body:', requestBody); // Log the request body
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/auth/google`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: requestBody,
+        });
+
+        console.log('Google Api Response:', response);
+
+        // Check response body
+        const responseData = await response.json();
+        return responseData;
+    } catch (error) {
+        console.log('Check Google error:', error);
+        const errorMessage = error.response?.data?.message || "Login failed";
+
+        showMessage({
+            message: 'Error',
+            description: errorMessage,
+            type: "danger",
+        });
+
+        throw errorMessage;
+    }
+};
+
 export const sendNotification = async () => {
     const response = await fetch('https://habitizr.com/api/push-notification', {
         method: 'POST',
@@ -431,6 +449,7 @@ export const sendNotification = async () => {
     const result = await response.json();
     console.log('Notification Response:', result);
 };
+
 
 //cancel Subscription
 export const cancelSubscription = async () => {

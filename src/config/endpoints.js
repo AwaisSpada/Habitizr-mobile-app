@@ -5,6 +5,7 @@ const ENDPOINTS = {
     HABITS:'api/habits',
     USER:'api/user',
     UPDATE_PROFILE:"api/user/update-profile",
+    GOOGLE_LOGIN: "api/auth/google"
   };
   
   export default ENDPOINTS;
