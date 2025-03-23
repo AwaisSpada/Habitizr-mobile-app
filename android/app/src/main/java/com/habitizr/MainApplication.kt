@@ -1,4 +1,4 @@
-package com.habitizr.habitizr
+package com.habitizr.habitizrapp
 
 import android.app.Application
 import com.facebook.react.PackageList

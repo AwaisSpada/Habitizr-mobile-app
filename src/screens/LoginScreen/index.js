@@ -29,13 +29,13 @@ const LoginScreen = (props) => {
   useEffect(() => {
     if (Platform.OS === 'android') {
       GoogleSignin.configure({
-        webClientId: '557005901423-jvr7j80apt6p06lp8dt8rrc1mgv9gtd7.apps.googleusercontent.com',
+        webClientId: '727936511077-987cakqcr6t40ga1t39e1ebmvft240qf.apps.googleusercontent.com',
         forceCodeForRefreshToken: true,
         offlineAccess: true,
       })
     } else {
       GoogleSignin.configure({
-        webClientId: '557005901423-jvr7j80apt6p06lp8dt8rrc1mgv9gtd7.apps.googleusercontent.com',
+        webClientId: '727936511077-987cakqcr6t40ga1t39e1ebmvft240qf.apps.googleusercontent.com',
         forceCodeForRefreshToken: true,
         iosClientId: '557005901423-mpoc8mcoo1p00h7itrtrtks7gtciqhba.apps.googleusercontent.com',
       })
@@ -51,11 +51,11 @@ const LoginScreen = (props) => {
       console.log('Google Login Success:', userInfo);
 
       // Ensure 'idToken' exists
-      if (!userInfo.idToken) {
+      if (!userInfo.data.idToken) {
         throw new Error('No ID token received');
       }
 
-      let response = await googleLogin(userInfo.idToken);
+      let response = await googleLogin(userInfo.data.idToken);
       console.log('Google API Response:', response);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {

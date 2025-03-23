@@ -79,9 +79,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.habitizr.habitizr"
+    namespace "com.habitizr.habitizrapp"
     defaultConfig {
-        applicationId "com.habitizr.habitizr"
+        applicationId "com.habitizr.habitizrapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
