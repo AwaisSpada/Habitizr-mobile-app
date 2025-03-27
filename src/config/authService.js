@@ -472,7 +472,6 @@ export const cancelSubscription = async () => {
 
 //forgot apssword
 export const handleForgotPassword = async (data) => {
-    console.log('cdhecke ', data)
     const requestBody = JSON.stringify({ email: data });
 
     try {
