@@ -406,7 +406,7 @@ export const googleLogin = async (data) => {
     console.log('Request Body:', requestBody); // Log the request body
 
     try {
-        const response = await fetch(`${BASE_URL}/api/auth/google`, {
+        const response = await fetch(`${BASE_URL}/api/auth/google-signin`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -467,5 +467,28 @@ export const cancelSubscription = async () => {
         return response;
     } catch (error) {
         console.error('Error canceling subscription:', error);
+    }
+};
+
+//forgot apssword
+export const handleForgotPassword = async (data) => {
+    console.log('cdhecke ', data)
+    const requestBody = JSON.stringify({ email: data });
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/forgot-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: requestBody
+        });
+        console.log('check the forgot response', response)
+        if (!response.ok) {
+            throw new Error('Failed to forgot subscription');
+        }
+        return response;
+    } catch (error) {
+        console.error('Error forgot Password:', error);
     }
 };

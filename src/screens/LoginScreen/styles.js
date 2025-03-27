@@ -41,13 +41,19 @@ const styles = StyleSheet.create({
   },
   socialButton: {
     flex: 1,
-    padding: 12,
     borderRadius: 12,
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: 'lightgrey',
     alignItems: "center",
-    marginHorizontal: 5
+    marginHorizontal: 10
+  },
+  socialButton1:{
+    flex: 1,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    padding: 12,
+    alignItems: "center",
   },
   socialText: {
     fontSize: 14,

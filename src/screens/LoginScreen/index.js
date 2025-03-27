@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
@@ -15,6 +16,7 @@ import { loginUser, registerUser, googleLogin } from '../../config/authService';
 import { AuthContext } from '../../context/AuthContext';
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import ForgotPasswordModal from '../../components/ForgotPasswordModal';
 
 const LoginScreen = (props) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +25,7 @@ const LoginScreen = (props) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { login } = useContext(AuthContext);
 
@@ -56,6 +59,10 @@ const LoginScreen = (props) => {
       }
 
       let response = await googleLogin(userInfo.data.idToken);
+      if (response?.user) {
+        login(response?.user);
+        setTimeout(() => props.navigation.navigate("Dashboard"), 100);
+      }
       console.log('Google API Response:', response);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -148,7 +155,6 @@ const LoginScreen = (props) => {
     }
   };
 
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -177,10 +183,17 @@ const LoginScreen = (props) => {
           <View style={{ alignItems: "center", paddingTop: 20 }}>
             <View style={styles.socialContainer}>
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => handleGoogleLogin()}>
-                <Text style={styles.socialText}>G Google</Text>
+                <View style={styles.socialButton1}>
+                  <Image source={require('../../assets/images/google.png')} style={{ width: 20, height: 20 }} />
+                  <Text style={styles.socialText}> Google</Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-                <Text style={styles.socialText}>f Facebook</Text>
+                <View style={styles.socialButton1}>
+                  <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
+                  <Text style={styles.socialText}> Apple</Text>
+                </View>
+
               </TouchableOpacity>
             </View>
 
@@ -265,6 +278,14 @@ const LoginScreen = (props) => {
                 <Text style={styles.submitText}>{isLogin ? "Login" : "Register"}</Text>
               )}
             </TouchableOpacity>
+            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 15 }} onPress={() => setIsModalVisible(true)}>
+              <Text style={{ color: 'rgb(32, 139, 216)' }}>Forgot Password ?</Text>
+            </TouchableOpacity>
+
+            <ForgotPasswordModal
+              visible={isModalVisible}
+              onClose={() => setIsModalVisible(false)}
+            />
           </View>
         </View>
 
