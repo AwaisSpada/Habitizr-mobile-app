@@ -16,6 +16,7 @@ import { loginUser, registerUser, googleLogin } from '../../config/authService';
 import { AuthContext } from '../../context/AuthContext';
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
 import ForgotPasswordModal from '../../components/ForgotPasswordModal';
 
 const LoginScreen = (props) => {
@@ -45,6 +46,30 @@ const LoginScreen = (props) => {
     }
 
   }, [])
+
+  const signInWithApple = async () => {
+    try {
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+
+      if (!appleAuthRequestResponse.identityToken) {
+        throw new Error("Apple Sign-In failed - no identity token received");
+      }
+
+      const { identityToken, user, email, fullName } = appleAuthRequestResponse;
+
+      console.log("Apple ID Token:", identityToken);
+      console.log("User ID:", user);
+      console.log("Email:", email);
+      console.log("Full Name:", fullName);
+
+    } catch (error) {
+      console.error("Apple Sign-In Error:", error);
+      Alert.alert("Sign-In Error", error.message);
+    }
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -188,7 +213,7 @@ const LoginScreen = (props) => {
                   <Text style={styles.socialText}> Google</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => signInWithApple()}>
                 <View style={styles.socialButton1}>
                   <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
                   <Text style={styles.socialText}> Apple</Text>
