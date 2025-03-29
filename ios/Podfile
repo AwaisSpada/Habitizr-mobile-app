@@ -12,11 +12,19 @@ linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
+else
+  use_modular_headers!  # ✅ Add this line
 end
 
 target 'Habitizr' do
   config = use_native_modules!
+  use_frameworks! :linkage => :static  # Ensure static linking
 
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Messaging'
+  pod 'Firebase/Firestore'
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.

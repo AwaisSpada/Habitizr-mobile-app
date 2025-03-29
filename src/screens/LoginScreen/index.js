@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
-import { loginUser, registerUser, googleLogin } from '../../config/authService';
+import { loginUser, registerUser, googleLogin, sendNotification} from '../../config/authService';
 import { AuthContext } from '../../context/AuthContext';
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -41,10 +41,9 @@ const LoginScreen = (props) => {
       GoogleSignin.configure({
         webClientId: '727936511077-987cakqcr6t40ga1t39e1ebmvft240qf.apps.googleusercontent.com',
         forceCodeForRefreshToken: true,
-        iosClientId: '557005901423-mpoc8mcoo1p00h7itrtrtks7gtciqhba.apps.googleusercontent.com',
+        iosClientId: '727936511077-l8e593r10l4ke7cb6l59tegqsdkb4e2j.apps.googleusercontent.com',
       })
     }
-
   }, [])
 
   const signInWithApple = async () => {
