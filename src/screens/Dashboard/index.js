@@ -11,6 +11,8 @@ import { AuthContext } from '../../context/AuthContext';
 import * as Progress from "react-native-progress";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import SubscriptionComparison from '../../components/SubscriptionComparison'
+import { paymentStripe } from '../../config/authService';
+import { useStripe } from '@stripe/stripe-react-native';
 import styles from "./styles";
 
 const Dashboard = (props) => {
@@ -21,8 +23,12 @@ const Dashboard = (props) => {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState()
   const [visible, setVisible] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+  const [isLoading, setIsLoading] = useState(false)
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [selectPlan, setSelectPlan] = useState(null);
 
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchHabits();
@@ -96,12 +102,14 @@ const Dashboard = (props) => {
     }
 
     const selectedDatesArray = habitData.selectedDates
+    console.log('selectedDatesArray', selectedDatesArray)
 
     const datesArray = Object.keys(selectedDatesArray);
 
     const formattedData = {
       ...habitObject,
-      selectedDays: datesArray.map(date => new Date(date).getDay()), // Convert to weekday numbers
+      // selectedDays: datesArray.map(date => new Date(date).getDay()), // Convert to weekday numbers
+      selectedDays: datesArray
     };
 
     console.log('formattedData', formattedData)
@@ -134,7 +142,7 @@ const Dashboard = (props) => {
 
     const formattedData = {
       ...habitObject,
-      selectedDays: datesArray.map(date => new Date(date).getDay()),
+      selectedDays: datesArray,
     };
 
     // let formattedData = {
@@ -256,20 +264,72 @@ const Dashboard = (props) => {
     setVisible(true)
   };
 
+  const fetchPaymentIntent = async () => {
+    setLoading(true)
+    setIsLoading(true)
+    try {
+      let plan = {
+        packageType: selectPlan,
+      }
+
+      const response = await paymentStripe(plan)
+      console.log('get payment client scret', response)
+
+      setClientSecret(response);
+      initializePaymentSheet(response);
+    } catch (error) {
+      showMessage({
+        message: "Error",
+        description: error?.message || 'Something went wrong!',
+        type: "danger",
+      });
+    } finally {
+      setLoading(false)
+      setIsLoading(false);
+    }
+  };
+
+  const initializePaymentSheet = async (clientSecret) => {
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Your Business Name",
+    });
+
+    if (!error) {
+      const { error: paymentError } = await presentPaymentSheet();
+      if (paymentError) {
+        showMessage({
+          message: "Error",
+          description: paymentError.message || 'Payment Failed',
+          type: "danger",
+        });
+      } else {
+        showMessage({
+          message: "Success",
+          description: 'Payment completed!',
+          type: "success",
+        });
+      }
+    }
+  };
+
+  const handleSelectPlan = (plan) => {
+    setSelectPlan(plan)
+  }
+
   return (
     <SafeAreaView style={styles.safeContainer}>
-      {loading && (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      )}
       {/* Fixed Header */}
       <View style={styles.header}>
         <Text style={styles.logo}>habitizr</Text>
-        <TouchableOpacity style={styles.upgradeButton} onPress={handlePayment}>
-          <Icon name="crown" size={16} color="white" />
-          <Text style={styles.upgradeText}> Upgrade to Trailblazer</Text>
-        </TouchableOpacity>
+        {
+          user?.packageType !== "trailblazer" ?
+            <TouchableOpacity style={styles.upgradeButton} onPress={handlePayment}>
+              <Icon name="crown" size={16} color="white" />
+              <Text style={styles.upgradeText}> Upgrade to Trailblazer</Text>
+            </TouchableOpacity>
+            : null
+        }
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
             <Icon name="account-circle" size={24} color="black" />
@@ -279,7 +339,11 @@ const Dashboard = (props) => {
           </TouchableOpacity>
         </View>
       </View>
-
+      {loading && (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
       {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
@@ -320,10 +384,10 @@ const Dashboard = (props) => {
           </Text>
           <View style={{ borderBottomWidth: 1, borderBottomColor: 'lightgrey', paddingTop: 10 }} />
           <Text style={styles.phoneStatus}>
-            Phone Status: <Text style={[styles.notVerified, { color: habits?.phoneVerified ? 'green' : '#E69A00' }]}>{habits?.phoneVerified ? "Verified" : "Not Verified"}</Text>
+            Phone Status: <Text style={[styles.notVerified, { color: user?.phoneVerified ? 'green' : '#E69A00' }]}>{user?.phoneVerified ? "Verified" : "Not Verified"}</Text>
           </Text>
 
-          {habits.length > 0 ? (
+          {
             habits.map((habit, index) => (
               <HabitCard
                 key={index}
@@ -335,18 +399,17 @@ const Dashboard = (props) => {
                 stopRunning={(habit) => handleStopRunning(habit)}
               />
             ))
-          ) : (
+          }
             // No Habits Card
-            <View style={styles.noHabitsCard}>
-              <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                <Icon name="plus" size={24} color="rgb(53,101,208)" />
-              </TouchableOpacity>
-              <Text style={styles.noHabitsTitle}>No habits yet</Text>
-              <Text style={styles.noHabitsDescription}>
-                Start building better habits today. Click the "+" button above to create your first habit.
-              </Text>
-            </View>
-          )}
+          <View style={styles.noHabitsCard}>
+            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+              <Icon name="plus" size={24} color="rgb(53,101,208)" />
+            </TouchableOpacity>
+            <Text style={styles.noHabitsTitle}>{habits.length > 0 ? 'Add new habits' : 'No habits yet'}</Text>
+            <Text style={styles.noHabitsDescription}>
+              Start building better habits today. Click the "+" button above to create your first habit.
+            </Text>
+          </View>
         </View>
 
         <Text style={styles.title}>Achievement Badges</Text>
@@ -477,7 +540,7 @@ const Dashboard = (props) => {
           isLoading={loading}
         />
       )}
-      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)} />
+      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} />
     </SafeAreaView>
   );
 };

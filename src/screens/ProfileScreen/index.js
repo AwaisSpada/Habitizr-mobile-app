@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Modal } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
-import { fetchUser, updateProfile, cancelSubscription, sendNotification } from '../../config/authService';
+import { fetchUser, updateProfile, cancelSubscription, deleteUser, changePassword, updatePhoneNumber } from '../../config/authService';
 import tiers from "../../lib/tiers";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import FlashMessage, { showMessage } from "react-native-flash-message";
 import SubscriptionComparison from '../../components/SubscriptionComparison'
 import CancelSubscriptionDialog from '../../components/CancelSubscription'
+import { AuthContext } from '../../context/AuthContext';
+import { paymentStripe } from '../../config/authService';
+import { useStripe } from '@stripe/stripe-react-native';
 import styles from './styles';
 
 const ProfileScreen = () => {
@@ -21,9 +24,14 @@ const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
+  const [clientSecret, setClientSecret] = useState('');
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [selectPlan, setSelectPlan] = useState(null);
 
   const navigation = useNavigation();
   const { TIERS, PRICING_TIERS, isWithinTrialPeriod } = tiers;
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     getUser();
@@ -55,7 +63,7 @@ const ProfileScreen = () => {
     return /^\+?\d{10,15}$/.test(phone);
   };
 
-  const handleUpdateProfile = async () => {
+  const handleChangePassword = async () => {
     if (!currentPassword) {
       showMessage({ message: "Error", description: 'Current password is required.', type: "danger" });
       return;
@@ -80,38 +88,66 @@ const ProfileScreen = () => {
       return;
     }
 
-    if (phoneNumber === '') {
-      showMessage({ message: "Error", description:'Enter a valid phone number', type: "danger" });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const updatedUser = {
-        phoneNumber,
-        currentPassword,
-        newPassword
-      };
-
-      const response = await updateProfile(updatedUser);
-      console.log('profile response', response)
+      const response = await changePassword(newPassword);
+      console.log('passwordUser response', response)
       if (response) {
-        showMessage({ message: "Profile updated successfully!", type: "success" });
+        showMessage({ message: "Changed Password successfully!", type: "success" });
       } else {
-        showMessage({ message: response?.message || "Failed to update profile.", type: "danger" });
+        showMessage({ message: response?.message || "Failed to Change Password.", type: "danger" });
       }
     } catch (error) {
-      console.log("Error updating profile:", error);
-      showMessage({ message: "Error", description: 'An error occurred while updating profile.', type: "danger" });
+      console.log("Error Change Password:", error);
+      showMessage({ message: "Error", description: 'An error occurred while Change Password.', type: "danger" });
+    } finally {
+      setIsLoading(false); // Hide loader
+    }
+  }
+
+  const handleUpdatePhone = async () => {
+    if (phoneNumber === '') {
+      showMessage({ message: "Error", description: 'Enter a valid phone number', type: "danger" });
+      return;
+    }
+    setIsLoading(true);
+
+    try {
+      const response = await updatePhoneNumber(phoneNumber);
+      console.log('phoneNumber response', response)
+      if (response) {
+        showMessage({ message: "phoneNumber updated successfully!", type: "success" });
+      } else {
+        showMessage({ message: response?.message || "Failed to phoneNumber profile.", type: "danger" });
+      }
+    } catch (error) {
+      console.log("Error phoneNumber profile:", error);
+      showMessage({ message: "Error", description: 'An error occurred while phoneNumber profile.', type: "danger" });
     } finally {
       setIsLoading(false); // Hide loader
     }
   };
 
   const handleDeleteAccount = async () => {
-    showMessage({ message: "Success", description: 'Your account has been permanently deleted', type: "success" });
-    setModalVisible(false)
+    setIsDeleteLoading(true)
+    try {
+      const response = await deleteUser();
+      console.log('delete user', response)
+      if (response.status === 200) {
+        showMessage({ message: "Success", description: 'Your account has been permanently deleted', type: "success" });
+        setIsDeleteLoading(false)
+        setModalVisible(false)
+        await logout();
+      } else {
+        showMessage({ message: "Error", description: 'Failed to Delete Account', type: "danger" });
+      }
+    } catch (error) {
+      showMessage({ message: "Error", description: 'Failed to Delete Account', type: "danger" });
+      setIsDeleteLoading(false)
+      setModalVisible(false)
+      console.log('Error fetching user:', error);
+    }
   };
 
   // Compute subscription details
@@ -119,6 +155,7 @@ const ProfileScreen = () => {
   const isInTrialPeriod = user?.createdAt ? isWithinTrialPeriod(new Date(user.createdAt)) : false;
   const currentPlan = PRICING_TIERS[user?.packageType || TIERS.PATHFINDER];
   const isTrialExpired = !isInTrialPeriod && user?.packageType === TIERS.PATHFINDER;
+
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
@@ -157,12 +194,62 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleSelectPlan = (plan) => {
+    setSelectPlan(plan)
+  }
+
+  const fetchPaymentIntent = async () => {
+    setIsLoading(true);
+    setIsUpgrading(true)
+    try {
+      let plan = {
+        packageType: selectPlan,
+      }
+
+      const response = await paymentStripe(plan)
+      console.log('get payment client scret', response)
+      setClientSecret(response);
+      initializePaymentSheet(response);
+    } catch (error) {
+      showMessage({
+        message: "Error",
+        description: error?.message || 'Something went wrong!',
+        type: "danger",
+      });
+    } finally {
+      setIsLoading(false);
+      setIsUpgrading(false)
+    }
+  };
+
+  const initializePaymentSheet = async (clientSecret) => {
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Your Business Name",
+    });
+
+    if (!error) {
+      const { error: paymentError } = await presentPaymentSheet();
+      if (paymentError) {
+        showMessage({
+          message: "Error",
+          description: paymentError.message || 'Payment Failed',
+          type: "danger",
+        });
+      } else {
+        showMessage({
+          message: "Success",
+          description: 'Payment completed!',
+          type: "success",
+        });
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
-
           {/* Back Button */}
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Icon name="arrow-left" size={24} color="black" />
@@ -173,12 +260,20 @@ const ProfileScreen = () => {
           <View style={styles.card}>
             <Text style={styles.subHeader}>Subscription Details</Text>
             <Text style={styles.description}>Your current plan and subscription status</Text>
+            {isTrialExpired && (
+              <View style={styles.trialBadge1}>
+                <Text style={[styles.trialText, { color: 'red' }]}>(TRIAL EXPIRED) click here to upgrade </Text>
+              </View>
+            )}
             <View style={{ backgroundColor: 'rgb(250,250,250)', padding: 20, borderRadius: 20 }}>
               <View style={styles.planContainer}>
                 <Text style={styles.planName}>{currentPlan.name} Plan</Text>
-                <View style={styles.trialBadge}>
-                  <Text style={styles.trialText}>Trial Period</Text>
-                </View>
+                {isInTrialPeriod && (
+                  <View style={styles.trialBadge}>
+                    <Text style={styles.trialText}>Trial Period</Text>
+                  </View>
+                )}
+
               </View>
               <Text style={styles.planPrice}>${currentPlan.price}/month</Text>
               <View style={styles.memberSinceContainer}>
@@ -201,7 +296,7 @@ const ProfileScreen = () => {
               </View>
               {isPathfinderUser ? (
                 <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade} disabled={isUpgrading}>
-                  <Text style={styles.upgradeText}>{isUpgrading ? 'Upgrading...' : 'Upgrade to Trailblazer'}</Text>
+                  <Text style={styles.upgradeText}>{isLoading ? 'Upgrading...' : 'Upgrade to Trailblazer'}</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={styles.cancelButton} onPress={() => setVisible(true)}>
@@ -262,7 +357,7 @@ const ProfileScreen = () => {
                 onChangeText={setPhoneNumber}
               />
             </View>
-            <TouchableOpacity style={styles.upgradeButton} onPress={handleUpdateProfile}
+            <TouchableOpacity style={styles.upgradeButton} onPress={newPassword ? handleChangePassword : handleUpdatePhone}
               disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator size="small" color="#fff" />
@@ -292,7 +387,11 @@ const ProfileScreen = () => {
                 </Text>
 
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
-                  <Text style={styles.deleteText}>Delete Account</Text>
+                  {isDeleteLoading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.deleteText}>Delete Account</Text>
+                  )}
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
@@ -303,7 +402,7 @@ const ProfileScreen = () => {
           </Modal>
         </View>
       </ScrollView>
-      <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} />
+      <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} />
       <CancelSubscriptionDialog
         visible={visible}
         onClose={() => setVisible(false)}

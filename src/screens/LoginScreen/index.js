@@ -12,12 +12,13 @@ import {
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
-import { loginUser, registerUser, googleLogin, sendNotification} from '../../config/authService';
+import { loginUser, registerUser, googleLogin, sendNotification, appleLogin } from '../../config/authService';
 import { AuthContext } from '../../context/AuthContext';
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes, } from '@react-native-google-signin/google-signin';
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
 import ForgotPasswordModal from '../../components/ForgotPasswordModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = (props) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -46,29 +47,100 @@ const LoginScreen = (props) => {
     }
   }, [])
 
+  const saveUserInfo = async (email, fullName) => {
+    try {
+      await AsyncStorage.setItem('apple_user_email', email);
+      await AsyncStorage.setItem('apple_user_name', fullName);
+    } catch (error) {
+      console.error('Failed to save Apple user info:', error);
+    }
+  };
+  
+  const getUserInfo = async () => {
+    try {
+      const email = await AsyncStorage.getItem('apple_user_email');
+      const name = await AsyncStorage.getItem('apple_user_name');
+      return { email, fullName: name };
+    } catch (error) {
+      console.error('Failed to get Apple user info:', error);
+      return {};
+    }
+  };
+
+  // const signInWithApple = async () => {
+  //   try {
+  //     const appleAuthRequestResponse = await appleAuth.performRequest({
+  //       requestedOperation: appleAuth.Operation.LOGIN,
+  //       requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+  //     });
+
+  //     if (!appleAuthRequestResponse.identityToken) {
+  //       throw new Error("Apple Sign-In failed - no identity token received");
+  //     }
+
+  //     const { identityToken, user, email, fullName } = appleAuthRequestResponse;
+  //     console.log("Apple ID Token:", identityToken);
+  //     console.log("User ID:", user);
+  //     console.log("Email:", email);
+  //     console.log("Full Name:", fullName?.givenName?.familyName);
+  //     let response = await appleLogin(email, fullName?.givenName);
+  //     if (response?.user) {
+  //       login(response?.user);
+  //       setTimeout(() => props.navigation.navigate("Dashboard"), 100);
+  //     }
+  //     console.log('Apple API Response:', response);
+  //   } catch (error) {
+  //     console.error("Apple Sign-In Error:", error);
+  //     showMessage({
+  //       message: "Error",
+  //       description: error.message,
+  //       type: "danger",
+  //     });    
+  //   }
+  // };
+
   const signInWithApple = async () => {
     try {
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
       });
-
+  
       if (!appleAuthRequestResponse.identityToken) {
         throw new Error("Apple Sign-In failed - no identity token received");
       }
-
+  
       const { identityToken, user, email, fullName } = appleAuthRequestResponse;
-
-      console.log("Apple ID Token:", identityToken);
-      console.log("User ID:", user);
-      console.log("Email:", email);
-      console.log("Full Name:", fullName);
-
+  
+      let storedEmail = email;
+      let storedName = fullName?.givenName;
+  
+      // If email or name not available, fetch from local storage
+      if (!email || !fullName) {
+        const savedInfo = await getUserInfo();
+        storedEmail = savedInfo.email;
+        storedName = savedInfo.fullName;
+      } else {
+        // Save info on first login
+        await saveUserInfo(email, fullName?.givenName);
+      }
+  
+      let response = await appleLogin(storedEmail, storedName);
+      if (response?.user) {
+        login(response?.user);
+        setTimeout(() => props.navigation.navigate("Dashboard"), 100);
+      }
+      console.log('Apple API Response:', response);
     } catch (error) {
       console.error("Apple Sign-In Error:", error);
-      Alert.alert("Sign-In Error", error.message);
+      showMessage({
+        message: "Error",
+        description: error.message,
+        type: "danger",
+      });
     }
   };
+  
 
   const handleGoogleLogin = async () => {
     try {

@@ -6,6 +6,17 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import DatePicker from 'react-native-date-picker';
 import { Calendar } from 'react-native-calendars';
+import { Checkbox, RadioButton } from 'react-native-paper';  // Use Checkbox instead of RadioButton
+
+const numbersToDays = {
+  0: "Sunday",
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday"
+};
 
 const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }) => {
   const [habitName, setHabitName] = useState('');
@@ -20,6 +31,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   const [selectedDates, setSelectedDates] = useState({});
   const [timezoneItems, setTimezoneItems] = useState([]);
   const [time, setTime] = useState(new Date());
+  const [selectedDays, setSelectedDays] = useState({});  // Store selected days in an object
 
   const moment = require('moment-timezone');
 
@@ -37,14 +49,6 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
       setTimezone(selectedHabit.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
     }
   }, [selectedHabit]);
-
-  // const handleSubmit = () => {
-  //   if (!habitName.trim()) return;
-  //   const updatedHabit = { habitName, description, frequency, reminderTime, timezone, selectedDates };
-  //   onCreate(updatedHabit);
-  //   setHabitName('');
-  //   setDescription('');
-  // };
 
   const handleSubmit = () => {
     if (!habitName.trim()) {
@@ -71,28 +75,61 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
       Alert.alert("Error", "Please select at least one date");
       return;
     }
-  
+
     const updatedHabit = { habitName, description, frequency, reminderTime, timezone, selectedDates };
     onCreate(updatedHabit);
-    
+
     // Reset form fields after submission
     setHabitName('');
     setDescription('');
   };
 
-  const toggleDateSelection = (day) => {
-    const dateString = day.dateString;
-    setSelectedDates((prevDates) => {
-      const updatedDates = { ...prevDates };
+  // const toggleDateSelection = (day) => {
 
-      if (updatedDates[dateString]) {
-        delete updatedDates[dateString]; // Deselect date
+  //   const dateString = day.dateString;
+  //   setSelectedDates((prevDates) => {
+  //     console.log('checek day', prevDates)
+  //     const updatedDates = { ...prevDates };
+
+  //     if (updatedDates[dateString]) {
+  //       delete updatedDates[dateString]; // Deselect date
+  //     } else {
+  //       updatedDates[dateString] = { selected: true, selectedColor: 'blue' }; // Select date
+  //     }
+
+  //     return updatedDates;
+  //   });
+  // };
+
+  const toggleDateSelection = (dayName) => {
+    setSelectedDays((prevSelectedDays) => {
+      const updatedDays = { ...prevSelectedDays };
+
+      if (updatedDays[dayName]) {
+        delete updatedDays[dayName];  // Deselect day
       } else {
-        updatedDates[dateString] = { selected: true, selectedColor: 'blue' }; // Select date
+        updatedDays[dayName] = true;  // Select day
       }
 
-      return updatedDates;
+      return updatedDays;
     });
+
+    const dayNumber = Object.keys(numbersToDays).find(key => numbersToDays[key] === dayName);
+    console.log('dayNumber', dayNumber)
+
+    if (dayNumber !== undefined) {
+      setSelectedDates((prevDates) => {
+        const updatedDates = { ...prevDates };
+
+        if (updatedDates[dayNumber]) {
+          delete updatedDates[dayNumber];
+        } else {
+          updatedDates[dayNumber] = { selected: true, selectedColor: 'blue' };
+        }
+
+        return updatedDates;
+      });
+    }
   };
 
   return (
@@ -158,7 +195,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                 }}
               />
 
-              {showCalendar && (
+              {/* {showCalendar && (
                 <View style={{ borderWidth: 1, borderRadius: 10, borderColor: "lightgrey" }}>
                   <Calendar
                     onDayPress={toggleDateSelection}
@@ -166,6 +203,27 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                   />
                 </View>
 
+              )} */}
+
+              {showCalendar && (
+                <View style={{ marginVertical: 10 }}>
+                  <Text style={styles.label}>Select Days</Text>
+                  <View style={styles.radioButtonContainer}>
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+
+                      <View style={styles.radioButtonItem} key={day}>
+                        <RadioButton.Android
+                          value={day}
+                          status={selectedDays[day] ? 'checked' : 'unchecked'}
+                          onPress={() => toggleDateSelection(day)}
+                          uncheckedColor="rgb(113,147,179)"
+                          color="rgb(113,147,179)"
+                        />
+                        <Text style={styles.radioButtonText}>{day}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
               )}
 
               <Text style={styles.label}>Reminder Time</Text>
@@ -354,6 +412,41 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 10,
+  },
+  radioButtonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  radioButtonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '48%',
+    marginBottom: 10,
+  },
+  radioButtonText: {
+    // marginLeft: 10,
+    fontSize: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '48%', // Adjust for 2 items per row
+    marginBottom: 10,
+  },
+  checkboxText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  radioButton: {
+    borderRadius: 50,  // Make it rounded like a radio button
+    width: 20,  // Adjust size
+    height: 20,  // Adjust size
   },
 });
 

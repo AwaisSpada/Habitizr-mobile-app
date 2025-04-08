@@ -71,6 +71,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 15,
   },
+  trialBadge1: {
+    // paddingHorizontal: 10,
+  },
   trialText: {
     color: '#3A5BA0',
     fontSize: 12,
@@ -265,6 +268,10 @@ const styles = StyleSheet.create({
   cancelText: {
     fontSize: 16,
     color: "#333",
+  },
+  loaderContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

@@ -403,8 +403,6 @@ export const updateProfile = async (data) => {
 
 export const googleLogin = async (data) => {
     const requestBody = JSON.stringify({ token: data });
-    console.log('Request Body:', requestBody); // Log the request body
-
     try {
         const response = await fetch(`${BASE_URL}/api/auth/google-signin`, {
             method: "POST",
@@ -421,6 +419,35 @@ export const googleLogin = async (data) => {
         return responseData;
     } catch (error) {
         console.log('Check Google error:', error);
+        const errorMessage = error.response?.data?.message || "Login failed";
+
+        showMessage({
+            message: 'Error',
+            description: errorMessage,
+            type: "danger",
+        });
+
+        throw errorMessage;
+    }
+};
+
+export const appleLogin = async (email, fullName) => {
+    console.log('apple Api Response:', email, fullName);
+    const requestBody = JSON.stringify({ email: email,  name: fullName});
+    try {
+        const response = await fetch(`${BASE_URL}/api/auth/apple-signin`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: requestBody,
+        });
+
+        // Check response body
+        const responseData = await response.json();
+        return responseData;
+    } catch (error) {
+        console.log('Check appleLogin error:', error);
         const errorMessage = error.response?.data?.message || "Login failed";
 
         showMessage({
@@ -489,5 +516,67 @@ export const handleForgotPassword = async (data) => {
         return response;
     } catch (error) {
         console.error('Error forgot Password:', error);
+    }
+};
+
+//Delete Account
+export const deleteUser = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/delete-user`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Failed to delete account');
+        }
+        return response;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
+export const changePassword = async (newPassword) => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/user/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ newPassword }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to change password');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error changing password:", error);
+        throw new Error(error.message || "Failed to change password");
+    }
+};
+
+// UPDATE PHONE NO API
+export const updatePhoneNumber = async (phoneNumber) => {
+    console.log('Received data:', phoneNumber);
+    try {
+        const response = await fetch(`${BASE_URL}/api/user/phone`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phoneNumber }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update phone number');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating phone number:", error);
+        throw new Error(error.message || "Failed to update phone number");
     }
 };

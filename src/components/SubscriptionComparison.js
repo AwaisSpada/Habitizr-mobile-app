@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, SafeAreaView, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -60,9 +60,20 @@ const features = [
     },
 ];
 
-const SubscriptionComparison = ({ visible, onClose }) => {
+const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, loading }) => {
     const navigation = useNavigation();
+    const [selectedPlan, setSelectedPlan] = useState(null);
+
     const { TIERS } = tiers;
+
+    const handleSelectPlan = (plan) => {
+        setSelectedPlan(plan);
+        selectPlan(plan)
+    };
+
+    const getBorderColor = (plan) => {
+        return selectedPlan === plan ? 'rgb(83,121,166)' : 'lightgrey'; // Change border color when selected
+    };
 
     return (
         <Modal visible={visible} animationType="slide" transparent={true}>
@@ -86,7 +97,7 @@ const SubscriptionComparison = ({ visible, onClose }) => {
                     </Text>
 
                     <ScrollView>
-                        <View style={{ borderWidth: 1, borderColor: 'lightgrey', borderRadius: 15, padding: 20, marginBottom: 20 }}>
+                        <TouchableOpacity style={{ borderWidth: 2, borderColor: getBorderColor(TIERS.PATHFINDER), borderRadius: 15, padding: 20, marginBottom: 20 }} onPress={() => handleSelectPlan(TIERS.PATHFINDER)}>
                             <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Pathfinder</Text>
                             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
                                 ${PRICING_TIERS[TIERS.PATHFINDER].price}/month
@@ -110,9 +121,9 @@ const SubscriptionComparison = ({ visible, onClose }) => {
                                     </View>
                                 </View>
                             ))}
-                        </View>
+                        </TouchableOpacity>
 
-                        <View style={{ borderWidth: 2, borderColor: 'rgb(83,121,166)', borderRadius: 15, padding: 20 }}>
+                        <TouchableOpacity style={{ borderWidth: 2, borderColor: getBorderColor(TIERS.TRAILBLAZER), borderRadius: 15, padding: 20 }} onPress={() => handleSelectPlan(TIERS.TRAILBLAZER)}>
                             <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Trailblazer</Text>
                             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
                                 ${PRICING_TIERS[TIERS.TRAILBLAZER].price}/month
@@ -136,17 +147,23 @@ const SubscriptionComparison = ({ visible, onClose }) => {
                                     </View>
                                 </View>
                             ))}
-                            <TouchableOpacity style={{
-                                backgroundColor: 'rgb(83,121,166)',
-                                padding: 12,
-                                borderRadius: 15,
-                                alignItems: 'center',
-                            }}
-                                onPress={() => { navigation.navigate('PaymentCheckout'), onClose }}
-                            >
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{
+                            backgroundColor: 'rgb(83,121,166)',
+                            padding: 12,
+                            borderRadius: 15,
+                            alignItems: 'center',
+                            marginBottom: 20,
+                            marginTop: 10
+                        }}
+                            onPress={() => { stripePayment(), onClose() }}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
                                 <Text style={{ color: 'white', textAlign: 'center' }}>Upgrade to Trailblazer</Text>
-                            </TouchableOpacity>
-                        </View>
+                            )}
+                        </TouchableOpacity>
                     </ScrollView>
                 </View>
             </SafeAreaView>
