@@ -10,10 +10,10 @@ const TIERS = {
     TRAILBLAZER: 'trailblazer',
 };
 
-const PRICING_TIERS = {
-    [TIERS.PATHFINDER]: { price: 0 },
-    [TIERS.TRAILBLAZER]: { price: 9.99 },
-};
+// const PRICING_TIERS = {
+//     [TIERS.PATHFINDER]: { price: 0 },
+//     [TIERS.TRAILBLAZER]: { price: 9.99 },
+// };
 
 const features = [
     {
@@ -60,11 +60,12 @@ const features = [
     },
 ];
 
-const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, loading }) => {
-    const navigation = useNavigation();
-    const [selectedPlan, setSelectedPlan] = useState(null);
+const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, loading, user }) => {
+    const { TIERS, PRICING_TIERS } = tiers;
 
-    const { TIERS } = tiers;
+    const navigation = useNavigation();
+    const [selectedPlan, setSelectedPlan] = useState(TIERS.TRAILBLAZER);
+
 
     const handleSelectPlan = (plan) => {
         setSelectedPlan(plan);
@@ -124,6 +125,17 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{ borderWidth: 2, borderColor: getBorderColor(TIERS.TRAILBLAZER), borderRadius: 15, padding: 20 }} onPress={() => handleSelectPlan(TIERS.TRAILBLAZER)}>
+                            <View style={{
+                                position: 'absolute',
+                                top: -10,
+                                right: 10,
+                                backgroundColor: '#5379a6',
+                                paddingVertical: 4,
+                                paddingHorizontal: 10,
+                                borderRadius: 20,
+                            }}>
+                                <Text style={{ color: 'white', fontSize: 12 }}>Recommended</Text>
+                            </View>
                             <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Trailblazer</Text>
                             <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
                                 ${PRICING_TIERS[TIERS.TRAILBLAZER].price}/month

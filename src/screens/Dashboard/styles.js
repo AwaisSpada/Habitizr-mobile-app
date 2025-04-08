@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     paddingTop: 20
   },
   logo: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "rgb(53,101,208)", // Blue color
   },

@@ -313,7 +313,6 @@ export const deleteHabit = async (habitId) => {
         }
         return { success: true };
     } catch (error) {
-        Alert.alert('Error', error.message);
         return { success: false };
     }
 };
@@ -349,7 +348,9 @@ export const paymentStripe = async (plan) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(plan),
+            body: JSON.stringify({
+                packageType: plan
+            }),
         });
 
         if (!response.ok) {
@@ -432,8 +433,7 @@ export const googleLogin = async (data) => {
 };
 
 export const appleLogin = async (email, fullName) => {
-    console.log('apple Api Response:', email, fullName);
-    const requestBody = JSON.stringify({ email: email,  name: fullName});
+    const requestBody = JSON.stringify({ email: email, name: fullName });
     try {
         const response = await fetch(`${BASE_URL}/api/auth/apple-signin`, {
             method: "POST",
@@ -578,5 +578,29 @@ export const updatePhoneNumber = async (phoneNumber) => {
     } catch (error) {
         console.error("Error updating phone number:", error);
         throw new Error(error.message || "Failed to update phone number");
+    }
+};
+
+// subscription 
+export const handleSubscription = async (plan) => {
+    console.log('Received data:', plan);
+    try {
+        const response = await fetch(`${BASE_URL}/api/create-checkout-session`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                packageType: plan
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to subscription');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error subscription:", error);
+        throw new Error(error.message || "Failed to subscription");
     }
 };

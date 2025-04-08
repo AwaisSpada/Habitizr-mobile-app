@@ -257,6 +257,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   cancelButton: {
+    backgroundColor: "rgb(246, 49, 42)",
     marginTop: 10,
     paddingVertical: 12,
     width: "100%",
@@ -267,11 +268,41 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 16,
-    color: "#333",
+    color: "white",
   },
   loaderContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  header1: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  logo1: {
+    fontSize:20,
+    fontWeight: "bold",
+    color: "rgb(53,101,208)", // Blue color
+  },
+  upgradeButton2: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgb(41,121,255)", // Blue button
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 15,
+    right: 10
+  },
+  upgradeText2: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 5,
+  },
+  headerIcons1: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 

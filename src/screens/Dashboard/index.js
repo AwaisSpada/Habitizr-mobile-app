@@ -62,13 +62,10 @@ const Dashboard = (props) => {
         });
       }
     } catch (error) {
-      showMessage({
-        message: 'Error',
-        description: error.message,
-        type: "danger"
-      });
+      console.log('error', error)
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const onClose = () => {
@@ -174,18 +171,16 @@ const Dashboard = (props) => {
   };
 
   const handleDeleteHabit = async (habitToDelete) => {
-    setHabits((prevHabits) => prevHabits.filter(habit => habit.id !== habitToDelete.id));
+    // setHabits((prevHabits) => prevHabits.filter(habit => habit.id !== habitToDelete.id));
     try {
       const result = await deleteHabit(habitToDelete.id);
-      console.log('check handleDeleteHabit', result)
-      if (result) {
+      if (result.success) {
         showMessage({ message: "Success", description: 'Habit Deleted successfully', type: "success" });
         setSelectedHabit(null)
-        // await fetchHabits()
+        await fetchHabits()
       }
     } catch (error) {
-      console.error("Error deleted habit:", error);
-      // showMessage({ message: "Error", description: 'Failed to delete habit', type: "danger" });
+      showMessage({ message: "Error", description: 'Failed to delete habit', type: "danger" });
     }
   };
 
@@ -225,10 +220,10 @@ const Dashboard = (props) => {
     }
   };
 
-  const handleOnStart = async () => {
+  const handleOnStart = async (habit) => {
     setLoading(true)
     try {
-      const response = await startHabit(habits[0].id);
+      const response = await startHabit(habit?.id);
       console.log('response', response)
       if (response) {
         fetchHabits()
@@ -241,8 +236,12 @@ const Dashboard = (props) => {
     }
   }
 
-  const openStart = () => {
-    setPhoneModalVisible(true)
+  const openStart = (habit) => {
+    if (user?.phoneVerified) {
+      handleOnStart(habit)
+    } else {
+      setPhoneModalVisible(true)
+    }
   }
 
   const handleStopRunning = async (habit) => {
@@ -323,12 +322,12 @@ const Dashboard = (props) => {
       <View style={styles.header}>
         <Text style={styles.logo}>habitizr</Text>
         {
-          user?.packageType !== "trailblazer" ?
+          !(user?.packageType === "trailblazer" && user?.stripeSubscriptionStatus === "active") && (
             <TouchableOpacity style={styles.upgradeButton} onPress={handlePayment}>
               <Icon name="crown" size={16} color="white" />
-              <Text style={styles.upgradeText}> Upgrade to Trailblazer</Text>
+              <Text style={styles.upgradeText}>Upgrade to Trailblazer</Text>
             </TouchableOpacity>
-            : null
+          )
         }
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
@@ -400,16 +399,24 @@ const Dashboard = (props) => {
               />
             ))
           }
-            // No Habits Card
-          <View style={styles.noHabitsCard}>
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-              <Icon name="plus" size={24} color="rgb(53,101,208)" />
-            </TouchableOpacity>
-            <Text style={styles.noHabitsTitle}>{habits.length > 0 ? 'Add new habits' : 'No habits yet'}</Text>
-            <Text style={styles.noHabitsDescription}>
-              Start building better habits today. Click the "+" button above to create your first habit.
-            </Text>
-          </View>
+          {(
+            (user?.packageType === "trailblazer" && habits?.length < 3) ||
+            (user?.packageType === "pathfinder" && habits?.length < 1)
+          ) && (
+              <View style={styles.noHabitsCard}>
+                <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                  <Icon name="plus" size={24} color="rgb(53,101,208)" />
+                </TouchableOpacity>
+                <Text style={styles.noHabitsTitle}>
+                  {habits?.length > 0 ? 'Create new Habit' : 'No Habits yet'}
+                </Text>
+                <Text style={styles.noHabitsDescription}>
+                  {habits?.length > 0
+                    ? `You can create ${3 - habits?.length} more habits`
+                    : 'Start building better habits today. Click the "+" button above to create your first habit.'}
+                </Text>
+              </View>
+            )}
         </View>
 
         <Text style={styles.title}>Achievement Badges</Text>
@@ -538,9 +545,10 @@ const Dashboard = (props) => {
           onClose={() => setPhoneModalVisible(false)}
           handleOnStart={handleOnStart}
           isLoading={loading}
+        // user={user}
         />
       )}
-      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} />
+      <SubscriptionComparison visible={visible} onClose={() => setVisible(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} user={user} />
     </SafeAreaView>
   );
 };

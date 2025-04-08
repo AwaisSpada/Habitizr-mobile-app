@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Modal } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
-import { fetchUser, updateProfile, cancelSubscription, deleteUser, changePassword, updatePhoneNumber } from '../../config/authService';
+import { fetchUser, handleSubscription, cancelSubscription, deleteUser, changePassword, updatePhoneNumber, logoutUser } from '../../config/authService';
 import tiers from "../../lib/tiers";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
@@ -14,7 +14,7 @@ import { paymentStripe } from '../../config/authService';
 import { useStripe } from '@stripe/stripe-react-native';
 import styles from './styles';
 
-const ProfileScreen = () => {
+const ProfileScreen = (props) => {
   const [user, setUser] = useState(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -156,7 +156,7 @@ const ProfileScreen = () => {
   const currentPlan = PRICING_TIERS[user?.packageType || TIERS.PATHFINDER];
   const isTrialExpired = !isInTrialPeriod && user?.packageType === TIERS.PATHFINDER;
 
-
+  console.log('isInTrialPeriod', isInTrialPeriod)
   const handleUpgrade = async () => {
     setIsUpgrading(true);
     // Implement upgrade logic here
@@ -199,6 +199,8 @@ const ProfileScreen = () => {
   }
 
   const fetchPaymentIntent = async () => {
+    console.log('select plan', selectPlan)
+
     setIsLoading(true);
     setIsUpgrading(true)
     try {
@@ -246,65 +248,105 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await logoutUser();
+      console.log('response', response.status)
+      if (response.status === 200 && response.data.message === "Logout successful") {
+        setTimeout(() => props.navigation.navigate("Login"), 100);  // Delay navigation slightly
+        await logout();
+      } else {
+        showMessage({
+          message: "Error",
+          description: 'Logout failed',
+          type: "danger",
+          icon: "danger",
+        });
+      }
+    } catch (error) {
+      showMessage({
+        message: "Error",
+        description: 'Logout failed. Please try again.',
+        type: "danger",
+        icon: "danger",
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           {/* Back Button */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Icon name="arrow-left" size={24} color="black" />
-          </TouchableOpacity>
+          <View style={styles.header1}>
+            <Text style={styles.logo1}>habitizr</Text>
+            {
+              !(user?.packageType === "trailblazer" && user?.stripeSubscriptionStatus === "active") && (
+                <TouchableOpacity style={styles.upgradeButton2} onPress={handleUpgrade}>
+                  <Icon name="crown" size={16} color="white" />
+                  <Text style={styles.upgradeText2}> Upgrade to Trailblazer</Text>
+                </TouchableOpacity>
+              )
+            }
+            <View style={styles.headerIcons1}>
+              <TouchableOpacity>
+                <Icon name="account-circle" size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleLogout}>
+                <Icon name="logout" size={24} color="black" style={{ marginLeft: 15 }} />
+              </TouchableOpacity>
+            </View>
 
+          </View>
+          <TouchableOpacity style={{ top: 15, flexDirection: 'row', alignItems: 'center' }} onPress={() => props.navigation.goBack()}>
+            <Icon name="arrow-left" size={24} color="black" />
+            <Text style={{ paddingLeft: 10 }}>Back to Dashboard</Text>
+          </TouchableOpacity>
           <Text style={styles.header}>Profile Settings</Text>
 
           <View style={styles.card}>
             <Text style={styles.subHeader}>Subscription Details</Text>
-            <Text style={styles.description}>Your current plan and subscription status</Text>
+            <Text style={styles.description}>
+              Your current plan and subscription status {isInTrialPeriod ? 'is in Trial' : ''}
+            </Text>
             {isTrialExpired && (
-              <View style={styles.trialBadge1}>
+              <TouchableOpacity style={styles.trialBadge1} onPress={handleUpgrade}>
                 <Text style={[styles.trialText, { color: 'red' }]}>(TRIAL EXPIRED) click here to upgrade </Text>
-              </View>
+              </TouchableOpacity>
             )}
-            <View style={{ backgroundColor: 'rgb(250,250,250)', padding: 20, borderRadius: 20 }}>
-              <View style={styles.planContainer}>
-                <Text style={styles.planName}>{currentPlan.name} Plan</Text>
-                {isInTrialPeriod && (
-                  <View style={styles.trialBadge}>
-                    <Text style={styles.trialText}>Trial Period</Text>
+            {
+              user?.stripeSubscriptionStatus === "active" ?
+                <View style={{ backgroundColor: 'rgb(250,250,250)', padding: 20, borderRadius: 20 }}>
+                  <View style={styles.planContainer}>
+                    <Text style={styles.planName}>{currentPlan.name} Plan</Text>
                   </View>
-                )}
+                  <Text style={styles.planPrice}>${currentPlan.price}/month</Text>
+                  <View style={styles.memberSinceContainer}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Feather name="calendar" size={24} color="grey" style={{ top: 5, right: 5 }} />
+                      <Text style={styles.memberSince}>Member Since </Text>
+                    </View>
+                    <Text style={[styles.memberSince1, { paddingLeft: 25 }]}>
+                      {user?.createdAt ? new Date(user.createdAt).toDateString() : 'N/A'}
+                    </Text>
+                  </View>
+                  <View style={styles.featuresList}>
+                    <Text style={styles.feature}>Plan Features : </Text>
+                    {currentPlan?.features?.map((feature, index) => (
+                      <View key={index} style={styles.featureItem}>
+                        <MaterialCommunityIcons name="checkbox-marked-circle-outline" size={24} color="#4A90E2" />
+                        <Text style={styles.featureText}>{feature}</Text>
+                      </View>
+                    ))}
+                  </View>
 
-              </View>
-              <Text style={styles.planPrice}>${currentPlan.price}/month</Text>
-              <View style={styles.memberSinceContainer}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Feather name="calendar" size={24} color="grey" style={{ top: 5, right: 5 }} />
-                  <Text style={styles.memberSince}>Member Since </Text>
+                  <TouchableOpacity style={styles.cancelButton} onPress={() => setVisible(true)}>
+                    <Text style={styles.cancelText}>Cancel Subscription</Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={[styles.memberSince1, { paddingLeft: 25 }]}>
-                  {user?.createdAt ? new Date(user.createdAt).toDateString() : 'N/A'}
-                </Text>
-              </View>
-              <View style={styles.featuresList}>
-                <Text style={styles.feature}>Plan Features : </Text>
-                {currentPlan?.features?.map((feature, index) => (
-                  <View key={index} style={styles.featureItem}>
-                    <MaterialCommunityIcons name="checkbox-marked-circle-outline" size={24} color="#4A90E2" />
-                    <Text style={styles.featureText}>{feature}</Text>
-                  </View>
-                ))}
-              </View>
-              {isPathfinderUser ? (
-                <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade} disabled={isUpgrading}>
-                  <Text style={styles.upgradeText}>{isLoading ? 'Upgrading...' : 'Upgrade to Trailblazer'}</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={styles.cancelButton} onPress={() => setVisible(true)}>
-                  <Text style={styles.cancelText}>Cancel Subscription</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+                : null}
           </View>
+
 
           <View style={styles.accountContainer}>
             <Text style={styles.title}>Account Settings</Text>

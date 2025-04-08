@@ -67,38 +67,6 @@ const LoginScreen = (props) => {
     }
   };
 
-  // const signInWithApple = async () => {
-  //   try {
-  //     const appleAuthRequestResponse = await appleAuth.performRequest({
-  //       requestedOperation: appleAuth.Operation.LOGIN,
-  //       requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-  //     });
-
-  //     if (!appleAuthRequestResponse.identityToken) {
-  //       throw new Error("Apple Sign-In failed - no identity token received");
-  //     }
-
-  //     const { identityToken, user, email, fullName } = appleAuthRequestResponse;
-  //     console.log("Apple ID Token:", identityToken);
-  //     console.log("User ID:", user);
-  //     console.log("Email:", email);
-  //     console.log("Full Name:", fullName?.givenName?.familyName);
-  //     let response = await appleLogin(email, fullName?.givenName);
-  //     if (response?.user) {
-  //       login(response?.user);
-  //       setTimeout(() => props.navigation.navigate("Dashboard"), 100);
-  //     }
-  //     console.log('Apple API Response:', response);
-  //   } catch (error) {
-  //     console.error("Apple Sign-In Error:", error);
-  //     showMessage({
-  //       message: "Error",
-  //       description: error.message,
-  //       type: "danger",
-  //     });    
-  //   }
-  // };
-
   const signInWithApple = async () => {
     try {
       const appleAuthRequestResponse = await appleAuth.performRequest({
