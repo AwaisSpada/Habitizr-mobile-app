@@ -161,7 +161,7 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
                             {loading ? (
                                 <ActivityIndicator size="small" color="#fff" />
                             ) : (
-                                <Text style={{ color: 'white', textAlign: 'center' }}>Upgrade to Trailblazer</Text>
+                                <Text style={{ color: 'white', textAlign: 'center' }}>Upgrade to {selectedPlan}</Text>
                             )}
                         </TouchableOpacity>
                     </ScrollView>
