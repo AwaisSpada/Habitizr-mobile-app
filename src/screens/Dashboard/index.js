@@ -404,7 +404,7 @@ const Dashboard = (props) => {
             (user?.packageType === "pathfinder" && habits?.length < 1)
           ) && (
               <View style={styles.noHabitsCard}>
-                <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                <TouchableOpacity style={styles.addButton} onPress={() => {setModalVisible(true), setSelectedHabit('')}}>
                   <Icon name="plus" size={24} color="rgb(53,101,208)" />
                 </TouchableOpacity>
                 <Text style={styles.noHabitsTitle}>
