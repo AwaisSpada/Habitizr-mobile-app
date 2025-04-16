@@ -1,26 +1,153 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Button } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Feather from "react-native-vector-icons/Feather";
+import { Calendar } from 'react-native-calendars';
 
 const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunning }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selected, setSelected] = useState(false);
+  const [showCalandar, setShowCalendar] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [formData, setFormData] = useState({
+    completed: false,
+  });
+
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const confirmDelete = () => {
     onDelete(habit); // Call delete function
     setModalVisible(false); // Close modal after deleting
   };
 
+  const formattedDate = selectedDate
+    ? new Date(selectedDate).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+    : '';
+
+  const handleFormSubmit = async () => {
+    if (!selectedDate) return;
+    setIsLoading(true); // Start loading
+
+    try {
+      const response = await fetch(`https://habitizr.com/api/habits/${habit.id}/completions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          habitId: habit.id,
+          completedAt: selectedDate,
+          completed: formData.completed,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update completion');
+      }
+
+      const updated = await response.json();
+
+      // ✅ Update local habit completions
+      const updatedCompletions = [...habit.completions];
+
+      const index = updatedCompletions.findIndex(c => c.completedAt.startsWith(selectedDate));
+
+      if (index !== -1) {
+        // update existing
+        updatedCompletions[index].completed = formData.completed;
+      } else {
+        // add new
+        updatedCompletions.push({
+          habitId: habit.id,
+          completedAt: selectedDate,
+          completed: formData.completed,
+        });
+      }
+
+      habit.completions = updatedCompletions; // ⚠️ only works if habit is mutable
+
+      // ✅ Trigger calendar refresh
+      setSelectedDate(null);
+      setIsModalVisible(false);
+      setFormData({ completed: false });
+
+      // Force re-render (optional, if calendar doesn't update)
+      setShowCalendar(false);
+      setTimeout(() => setShowCalendar(true), 10);
+
+      alert('✅ Habit updated!');
+    } catch (error) {
+      console.error('Update error:', error);
+      alert(`❌ Error: ${error.message}`);
+    }
+    finally {
+      setIsLoading(false); // Stop loading
+    }
+  };
+
+
   const callHabitInsights = () => {
     onHabitInsights(habit)
   }
+
+  const getMarkedDates = (habit) => {
+    const completions = habit.completions || [];
+    const marked = {};
+    const today = new Date();
+    const start = new Date(habit.startedAt);
+
+    // Convert completions into a map for quick lookup
+    const completionMap = {};
+    completions.forEach(({ completedAt, completed }) => {
+      const date = new Date(completedAt).toISOString().split('T')[0];
+      completionMap[date] = completed;
+    });
+
+    // Loop through each date from start to today
+    for (let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const isToday = dateStr === today.toISOString().split('T')[0];
+      const completed = completionMap[dateStr];
+
+      // Mark today as gray regardless, past dates must be green/red
+      marked[dateStr] = {
+        customStyles: {
+          container: {
+            backgroundColor: isToday
+              ? '#ddd'
+              : completed === true
+                ? 'green'
+                : 'red',
+            borderRadius: 5,
+          },
+          text: {
+            color: 'white',
+          },
+        },
+      };
+    }
+
+    return marked;
+  };
+
+
+
 
   return (
     <TouchableOpacity
       style={[styles.card, { borderColor: selected ? "blue" : "lightgrey" }]}
       onPress={() => {
         setSelected(!selected);
+
         callHabitInsights(); // Call the function correctly
       }}
       activeOpacity={0.8}
@@ -68,7 +195,7 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
 
         </View>
         <View>
-          {habit.selectedDays && habit.selectedDays.length > 0 && (
+          {habit.frequency !== 'daily' && habit.selectedDays && habit.selectedDays.length > 0 && (
             <View style={styles.detailRow}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather name="check-square" size={20} color="gray" />
@@ -129,33 +256,113 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
             </Text>
           </View>
         )}
+
+        <TouchableOpacity
+          style={[styles.startButton, { alignItems: 'center', marginTop: 20 }]}
+          onPress={() => setShowCalendar(!showCalandar)}
+        >
+          <Text style={[styles.startButtonText, { textAlign: 'center' }]}>Update Habit Response</Text>
+        </TouchableOpacity>
+
+        {showCalandar && (
+          <>
+            <Calendar
+              markingType="custom"
+              minDate={new Date(habit.startedAt)}
+              maxDate={new Date()}
+              onDayPress={(day) => {
+                setSelectedDate(day.dateString);     // set date string
+                setFormData({ completed: false });   // reset form
+                setIsModalVisible(true);             // open modal
+              }}
+
+              monthFormat={'MMMM yyyy'} // e.g. "April 2025"
+              markedDates={getMarkedDates(habit)} />
+            <Modal
+              visible={isModalVisible}
+              animationType="slide"
+              transparent={true}
+              onRequestClose={() => {
+                setIsModalVisible(false);
+                setSelectedDate(null);
+              }}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modal}>
+                  <Text style={styles.modalTitle}>Edit Habit Response</Text>
+                  <Text style={styles.modalDescription}>
+                    You are updating <Text style={styles.boldText}>{habit.name}</Text> for{' '}
+                    <Text style={styles.boldText}>
+                      {selectedDate && new Date(selectedDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </Text>
+                  </Text>
+
+                  {/* Completion Checkbox */}
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => setFormData({ ...formData, completed: !formData.completed })}
+                  >
+                    <Text style={styles.checkboxText}>
+                      {formData.completed ? '✔️ Completed' : '❌ Not Completed'}
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                    <Button
+                      title="Cancel"
+                      onPress={() => {
+                        setIsModalVisible(false);
+                        setSelectedDate(null);
+                        setFormData({ completed: false });
+                      }}
+                      color="#888"
+                    />
+
+                    <Button
+                      title={isLoading ? 'Saving...' : 'Save'}
+                      onPress={handleFormSubmit}
+                      disabled={isLoading}
+                    />
+                  </View>
+
+
+
+                </View>
+              </View>
+            </Modal>
+
+            <Modal
+              visible={modalVisible}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                  <Text style={styles.modalTitle}>Are you absolutely sure?</Text>
+                  <Text style={styles.modalMessage}>
+                    This action cannot be undone. This will permanently delete the habit
+                    "{habit.name}" and all associated data including your progress. check-ins and insights.
+                  </Text>
+
+                  <TouchableOpacity style={styles.deleteButton} onPress={confirmDelete}>
+                    <Text style={styles.deleteText}>Delete Habit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+
+          </>
+        )}
       </View>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Are you absolutely sure?</Text>
-            <Text style={styles.modalMessage}>
-              This action cannot be undone. This will permanently delete the habit
-              "{habit.habitName}" and all associated data including your progress. check-ins and insights.
-            </Text>
-
-            <TouchableOpacity style={styles.deleteButton} onPress={confirmDelete}>
-              <Text style={styles.deleteText}>Delete Habit</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </TouchableOpacity>
   );
 };
@@ -218,6 +425,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "green",
     borderWidth: 1,
+    justifyContent: 'center',
+
     borderRadius: 16,
     paddingVertical: 6,
     paddingHorizontal: 20,
@@ -235,6 +444,7 @@ const styles = StyleSheet.create({
     color: "green",
     fontSize: 16,
     marginLeft: 6,
+    textAlign: "center",
   },
   stopButtonText: {
     color: "orange",
@@ -292,6 +502,61 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+
+  modal: {
+    backgroundColor: '#fff',
+    width: '90%',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: '#222',
+  },
+
+  modalDescription: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  boldText: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
+  checkbox: {
+    marginVertical: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+
+  checkboxText: {
+    fontSize: 16,
+    color: '#333',
+  },
+
+
 });
 
 export default HabitCard;

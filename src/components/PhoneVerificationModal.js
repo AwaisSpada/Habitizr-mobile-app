@@ -6,7 +6,8 @@ import {
     StyleSheet,
     TextInput,
     Modal,
-    ActivityIndicator
+    ActivityIndicator,
+    Linking
 } from "react-native";
 import CountryPicker from "react-native-country-picker-modal";
 import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
@@ -14,6 +15,8 @@ import Entypo from "react-native-vector-icons/Entypo"; // Import Ionicons
 const PhoneVerificationModal = ({ isVisible, onClose, onVerify, handleOnStart, isLoading }) => {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [isChecked, setIsChecked] = useState(false);
+    const [smsOptin, setSMSOptin] = useState(false);
+
     const [countryCode, setCountryCode] = useState("US"); // Default country
     const [callingCode, setCallingCode] = useState("1"); // Default calling code
 
@@ -35,8 +38,10 @@ const PhoneVerificationModal = ({ isVisible, onClose, onVerify, handleOnStart, i
                     <View style={styles.phoneContainer}>
                         <CountryPicker
                             withCallingCode
+                            countryCodes={["US", "CA", "MX"]} // Add more country codes as needed
                             withFilter
                             withFlag
+
                             countryCode={countryCode}
                             onSelect={(country) => {
                                 setCountryCode(country.cca2);
@@ -58,13 +63,35 @@ const PhoneVerificationModal = ({ isVisible, onClose, onVerify, handleOnStart, i
                         style={styles.checkboxContainer}
                         onPress={() => setIsChecked(!isChecked)}
                     >
-                        <View style={[styles.checkbox, isChecked && styles.checkedBox]}>
+                        <View style={[styles.checkbox, isChecked && styles.checkedBox, {color: '#1E90FF'}]}>
                             {isChecked && (
                                 <Entypo name="check" size={18} color="white" />
                             )}
                         </View>
-                        <Text style={styles.checkboxText}>
+                        <Text style={styles.checkboxText}
+                            onPress={() => Linking.openURL('https://habitizr.com/?tos=true')}>
                             I accept the <Text style={styles.link}>Terms of Service</Text>
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.checkboxContainer}
+                        onPress={() => setSMSOptin(!smsOptin)}
+                    >
+                        <View style={[styles.checkbox, smsOptin && styles.checkedBox]}>
+                            {setSMSOptin && (
+                                <Entypo name="check" size={18} color="white" />
+                            )}
+                        </View>
+                        <Text style={[styles.checkboxText, { width: '90%' }]}>
+                            I consent to receive automated text messages (SMS) from Habitizr at the phone number provided for habit tracking reminders, progress follow-ups, and service-related notifications. Message and data rates may apply.
+                            I understand that consent is not required to use the service and that I may opt out at any time by replying STOP.
+                            <Text
+                                style={{ color: '#1E90FF', textDecorationLine: 'underline' }}
+                                onPress={() => Linking.openURL('https://habitizr.com/?privacy=true')}
+                            >
+                                SMS Opt In Policy
+                            </Text>
                         </Text>
                     </TouchableOpacity>
 
@@ -72,19 +99,20 @@ const PhoneVerificationModal = ({ isVisible, onClose, onVerify, handleOnStart, i
                     <TouchableOpacity
                         style={[styles.disabledButton]}
                         // onPress={() => onVerify(`+${callingCode} ${phoneNumber}`)}
-                        onPress={() => { handleOnStart() }}
+                        onPress={() => { handleOnStart(phoneNumber) }}
                         disabled={!isChecked || phoneNumber.length < 7}
                     >
                         {isLoading ? (
-                            <View style={{ flexDirection: 'row', alignItems:'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <ActivityIndicator size="small" color="#fff" />
                                 <Text style={styles.buttonText}>  Verifying...</Text>
                             </View>
                         ) : (
-                            <Text style={styles.buttonText}>{isLoading ? "Verifying..." : "Verify & Start Habit"}</Text>
+                            <Text style={styles.buttonText}>{isLoading ? "Verifying..." : "Verify Number"}</Text>
                         )}
 
                     </TouchableOpacity>
+
                 </View>
             </View>
         </Modal>
@@ -187,8 +215,8 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     checkedBox: {
-        backgroundColor: "#4A90E2",
-        borderColor: "#4A90E2",
+        backgroundColor: "#1E90FF",
+        borderColor: "#1E90FF",
     },
     checkmark: {
         color: "white",

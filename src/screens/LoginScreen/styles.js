@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    color: 'rgb(53,101,208)',
+    color: '#1c5c84',
     paddingTop: 50
   },
   subHeader: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     width: "95%",
-    backgroundColor: "#2979FF",
+    backgroundColor: "#1c5c84",
     padding: 15,
     borderRadius: 14,
     alignItems: "center",
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "rgb(53,101,208)", // Blue text
+    color: "#1c5c84", // Blue text
     textAlign: "center",
     marginBottom: 15,
     paddingTop: 30
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   mainTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: 'rgb(113,177,224)'
+    color: '#1c5c84'
   },
   checkboxContainer: {
     flexDirection: "row",

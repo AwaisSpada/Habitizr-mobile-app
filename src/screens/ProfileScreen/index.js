@@ -152,9 +152,9 @@ const ProfileScreen = (props) => {
 
   // Compute subscription details
   const isPathfinderUser = user?.packageType === TIERS.PATHFINDER;
-  const isInTrialPeriod = user?.createdAt ? isWithinTrialPeriod(new Date(user.createdAt)) : false;
+  const isInTrialPeriod = user?.createdAt ? isWithinTrialPeriod(new Date(user.createdAt), user?.stripeSubscriptionStatus) : false;
   const currentPlan = PRICING_TIERS[user?.packageType || TIERS.PATHFINDER];
-  const isTrialExpired = !isInTrialPeriod && user?.packageType === TIERS.PATHFINDER;
+  const isTrialExpired = !isInTrialPeriod && user?.stripeSubscriptionStatus === 'trial';
 
   console.log('isInTrialPeriod', isInTrialPeriod)
   const handleUpgrade = async () => {
@@ -168,7 +168,7 @@ const ProfileScreen = (props) => {
       const response = await cancelSubscription(); // Fix: Call correct API
       console.log('cancelSubscription response:', response); // Debugging log
 
-      if (response.success) {
+      if (response.ok) {
         showMessage({
           message: 'Success',
           description: 'Your subscription has been canceled. You will have access until the end of your billing period.',
@@ -181,6 +181,7 @@ const ProfileScreen = (props) => {
           type: "danger"
         });
       }
+      getUser();
     } catch (error) {
       console.error('Error canceling subscription:', error);
       showMessage({
@@ -209,7 +210,17 @@ const ProfileScreen = (props) => {
       }
 
       const response = await paymentStripe(plan)
-      console.log('get payment client scret', response)
+      console.log('get payment client scret', response);
+
+            if(response == false){
+              showMessage({
+                message: "Success",
+                description: 'Basic Subscription Completed Successfully',
+                type: "success",
+              });
+              return;
+            }
+      
       setClientSecret(response);
       initializePaymentSheet(response);
     } catch (error) {
@@ -284,7 +295,7 @@ const ProfileScreen = (props) => {
               !(user?.packageType === "trailblazer" && user?.stripeSubscriptionStatus === "active") && (
                 <TouchableOpacity style={styles.upgradeButton2} onPress={handleUpgrade}>
                   <Icon name="crown" size={16} color="white" />
-                  <Text style={styles.upgradeText2}> Upgrade to Trailblazer</Text>
+                  <Text style={styles.upgradeText2}> Upgrade</Text>
                 </TouchableOpacity>
               )
             }
@@ -444,7 +455,7 @@ const ProfileScreen = (props) => {
           </Modal>
         </View>
       </ScrollView>
-      <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} />
+   { user &&  <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} user={user} />}
       <CancelSubscriptionDialog
         visible={visible}
         onClose={() => setVisible(false)}

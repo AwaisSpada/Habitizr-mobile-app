@@ -25,7 +25,9 @@ const App = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <StripeProvider publishableKey="pk_test_51IEPC9JKwzZ1wTvdJSbCqbmPH6PIhd5HcDXzck2oLuIcsbnG2qSePyoO5zXQwunzCCqtq9cvXjYsbPloE4KsifKf00jRQQwMDj">
+      <StripeProvider publishableKey="pk_test_51IEPC9JKwzZ1wTvdJSbCqbmPH6PIhd5HcDXzck2oLuIcsbnG2qSePyoO5zXQwunzCCqtq9cvXjYsbPloE4KsifKf00jRQQwMDj"
+      merchantIdentifier='merchant.com.habitizr'
+      >
         <AuthProvider>
           <AppNavigator />
           <FlashMessage

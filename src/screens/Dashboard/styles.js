@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { lightGreen100 } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 const styles = StyleSheet.create({
   safeContainer: {
@@ -23,12 +24,12 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "rgb(53,101,208)", // Blue color
+    color: "#1c5c84", // Blue color
   },
   upgradeButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgb(41,121,255)", // Blue button
+    backgroundColor: "#1c5c84", // Blue button
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 15,
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   habitsTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "rgb(53,101,208)",
+    color: "#1c5c84",
   },
 
   habitsSubtitle: {
@@ -193,6 +194,12 @@ const styles = StyleSheet.create({
   icon: {
     paddingRight: 10,
   },
+  unlockIcon: {
+    resizeMode: 'cover',
+    marginRight: 10,
+    color:"#1c5c84",
+    tintColor: '#1c5c84' // if you want to tint the PNG
+  },  
   badgeTitle: {
     fontSize: 16,
     fontWeight: "bold",
@@ -204,7 +211,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "rgb(53,101,208)",
+    color: "#1c5c84",
     marginBottom: 10,
     paddingLeft: 20
   },

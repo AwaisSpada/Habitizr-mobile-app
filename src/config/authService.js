@@ -1,6 +1,7 @@
 import api from "./api";
 import ENDPOINTS from "./endpoints";
 import { showMessage } from "react-native-flash-message";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ✅ Register User
 export const registerUser = async ({ username, email, password }) => {
@@ -34,7 +35,8 @@ export const registerUser = async ({ username, email, password }) => {
 // ✅ Login User
 export const loginUser = async ({ username, password }) => {
     try {
-        const response = await api.post(ENDPOINTS.LOGIN, { username, password });
+        let fcmToken = await AsyncStorage.getItem('fcmToken');
+        const response = await api.post(ENDPOINTS.LOGIN, { username, password, fcmToken });
         console.log('checek login response', response)
 
         showMessage({
@@ -45,15 +47,14 @@ export const loginUser = async ({ username, password }) => {
 
         return response.data;
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Login failed";
+        console.log(error.response);
+        // showMessage({
+        //     message: 'Error',
+        //     description: error.response?.data?.message || "Login failed",
+        //     type: "danger",
+        // });
 
-        showMessage({
-            message: 'Error',
-            description: errorMessage,
-            type: "danger",
-        });
-
-        throw errorMessage;
+        throw {message:error.response?.data?.message || "Login failed"};
     }
 };
 
@@ -292,6 +293,7 @@ export const editHabit = async (habitId, habit) => {
 
 // ✅ Delete Habit
 export const deleteHabit = async (habitId) => {
+    console.log(habitId);
     try {
         const response = await fetch(`${BASE_URL}/api/habits/${habitId}`, {
             method: 'DELETE',
@@ -313,6 +315,7 @@ export const deleteHabit = async (habitId) => {
         }
         return { success: true };
     } catch (error) {
+        console.log(error);
         return { success: false };
     }
 };
@@ -342,6 +345,7 @@ export const upgradePlans = async (plan) => {
 }
 
 export const paymentStripe = async (plan) => {
+    const packageType = typeof plan === 'object' ? plan.packageType : plan;
     try {
         const response = await fetch(`${BASE_URL}/api/get-client-secret`, {
             method: "POST",
@@ -349,7 +353,7 @@ export const paymentStripe = async (plan) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                packageType: plan
+                packageType: packageType
             }),
         });
 
@@ -362,6 +366,9 @@ export const paymentStripe = async (plan) => {
 
         const data = JSON.parse(rawText); // Manually parse JSON
         console.log("Client Secret:", data.clientSecret);
+        if(data?.needClientSeceret === false){
+            return false;
+        }
 
         return data.clientSecret;
     } catch (error) {
@@ -403,7 +410,8 @@ export const updateProfile = async (data) => {
 };
 
 export const googleLogin = async (data) => {
-    const requestBody = JSON.stringify({ token: data });
+    let fcmToken = await AsyncStorage.getItem('fcmToken');
+    const requestBody = JSON.stringify({ token: data, fcmToken });
     try {
         const response = await fetch(`${BASE_URL}/api/auth/google-signin`, {
             method: "POST",
@@ -433,7 +441,8 @@ export const googleLogin = async (data) => {
 };
 
 export const appleLogin = async (email, fullName) => {
-    const requestBody = JSON.stringify({ email: email, name: fullName });
+    let fcmToken = await AsyncStorage.getItem('fcmToken');
+    const requestBody = JSON.stringify({ email: email, name: fullName, fcmToken });
     try {
         const response = await fetch(`${BASE_URL}/api/auth/apple-signin`, {
             method: "POST",

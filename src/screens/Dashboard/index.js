@@ -5,7 +5,7 @@ import Feather from 'react-native-vector-icons/Feather'
 import HabitCreationModal from "../../components/HabitCreationModal";
 import HabitCard from "../../components/HabitCard";
 import PhoneVerificationModal from "../../components/PhoneVerificationModal";
-import { logoutUser, getHabits, newCreateHabit, deleteHabit, editHabit, habitInsights, startHabit, stopHabit } from '../../config/authService';
+import { logoutUser, getHabits, newCreateHabit, deleteHabit, editHabit, habitInsights, startHabit, stopHabit, updatePhoneNumber } from '../../config/authService';
 import { showMessage } from "react-native-flash-message";
 import { AuthContext } from '../../context/AuthContext';
 import * as Progress from "react-native-progress";
@@ -14,6 +14,8 @@ import SubscriptionComparison from '../../components/SubscriptionComparison'
 import { paymentStripe } from '../../config/authService';
 import { useStripe } from '@stripe/stripe-react-native';
 import styles from "./styles";
+import { Image } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 
 const Dashboard = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -222,6 +224,7 @@ const Dashboard = (props) => {
 
   const handleOnStart = async (habit) => {
     setLoading(true)
+    console.log(habit);
     try {
       const response = await startHabit(habit?.id);
       console.log('response', response)
@@ -233,6 +236,23 @@ const Dashboard = (props) => {
     } catch (error) {
       setLoading(false)
       console.log('error', error)
+    }
+  }
+
+  const verifyPhoneNumber = async (phoneNumber) => {
+    setLoading(true)
+    try {
+      const response = await updatePhoneNumber(phoneNumber);
+      if (response) {
+        showMessage({ message: "SMS has been sent your number, please verify", type: "success" });
+        setPhoneModalVisible(false);
+      } else {
+        showMessage({ message: response?.message || "Failed to phoneNumber profile.", type: "danger" });
+      }
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -264,15 +284,22 @@ const Dashboard = (props) => {
   };
 
   const fetchPaymentIntent = async () => {
+    console.log('SELECT PLAN:: ', selectPlan);
     setLoading(true)
     setIsLoading(true)
     try {
-      let plan = {
-        packageType: selectPlan,
-      }
 
-      const response = await paymentStripe(plan)
+      const response = await paymentStripe(selectPlan)
       console.log('get payment client scret', response)
+
+      if (response == false) {
+        showMessage({
+          message: "Success",
+          description: 'Basic Subscription Completed Successfully',
+          type: "success",
+        });
+        return;
+      }
 
       setClientSecret(response);
       initializePaymentSheet(response);
@@ -325,10 +352,11 @@ const Dashboard = (props) => {
           !(user?.packageType === "trailblazer" && user?.stripeSubscriptionStatus === "active") && (
             <TouchableOpacity style={styles.upgradeButton} onPress={handlePayment}>
               <Icon name="crown" size={16} color="white" />
-              <Text style={styles.upgradeText}>Upgrade to Trailblazer</Text>
+              <Text style={styles.upgradeText}>Upgrade</Text>
             </TouchableOpacity>
           )
         }
+
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => props.navigation.navigate('Profile')}>
             <Icon name="account-circle" size={24} color="black" />
@@ -388,24 +416,27 @@ const Dashboard = (props) => {
 
           {
             habits.map((habit, index) => (
-              <HabitCard
-                key={index}
-                habit={habit}
-                onDelete={handleDeleteHabit}
-                onEdit={() => handleEditHabit(habit)} // Pass the habit object
-                onStart={() => openStart(habit)}
-                onHabitInsights={handleHabitInsights}
-                stopRunning={(habit) => handleStopRunning(habit)}
-              />
+              <View key={index}>
+                <HabitCard
+                  habit={habit}
+                  onDelete={handleDeleteHabit}
+                  onEdit={() => handleEditHabit(habit)} // Pass the habit object
+                  onStart={() => openStart(habit)}
+                  onHabitInsights={handleHabitInsights}
+                  stopRunning={() => handleStopRunning(habit)} // Fixed to pass habit as argument
+                />
+               
+              </View>
             ))
           }
+
           {(
             (user?.packageType === "trailblazer" && habits?.length < 3) ||
             (user?.packageType === "pathfinder" && habits?.length < 1)
           ) && (
               <View style={styles.noHabitsCard}>
-                <TouchableOpacity style={styles.addButton} onPress={() => {setModalVisible(true), setSelectedHabit('')}}>
-                  <Icon name="plus" size={24} color="rgb(53,101,208)" />
+                <TouchableOpacity style={styles.addButton} onPress={() => { setModalVisible(true), setSelectedHabit('') }}>
+                  <Icon name="plus" size={24} color="#1c5c84" />
                 </TouchableOpacity>
                 <Text style={styles.noHabitsTitle}>
                   {habits?.length > 0 ? 'Create new Habit' : 'No Habits yet'}
@@ -426,7 +457,14 @@ const Dashboard = (props) => {
           <Text style={styles.description}>Major accomplishments in your journey</Text>
 
           <View style={styles.badge}>
-            <Feather name="lock" size={30} style={styles.icon} />
+            {habits?.length ?
+              // <Image
+              //   source={require('../../assets/images/badge.png')} // Replace with your actual image path
+              //   style={styles.unlockIcon}
+              // />
+              <Feather name="award" size={30} style={styles.unlockIcon} />
+              : <Feather name="lock" size={30} style={styles.icon} />
+            }
             <View>
               <Text style={styles.badgeTitle}>Habit Pioneer</Text>
               <Text style={styles.badgeDescription}>Create your first habit</Text>
@@ -543,7 +581,7 @@ const Dashboard = (props) => {
         <PhoneVerificationModal
           isVisible={phoneModalVisible}
           onClose={() => setPhoneModalVisible(false)}
-          handleOnStart={handleOnStart}
+          handleOnStart={(number) => verifyPhoneNumber(number)} // Don't use undefined "number" here
           isLoading={loading}
         // user={user}
         />

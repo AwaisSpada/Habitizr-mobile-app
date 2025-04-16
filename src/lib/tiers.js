@@ -3,6 +3,7 @@ const TIERS = {
     TRAILBLAZER: "trailblazer",
     FREE: "free",
     ADMIN: "admin",
+    BASIC:"basic"
   };
   
   const PRICING_TIERS = {
@@ -40,9 +41,21 @@ const TIERS = {
       maxHabits: 3,
       price: 0,
       features: [
-        "Up to 3 Active Habits",
+        "Up to 1 Active Habits",
         "Basic AI Insights",
         "Daily SMS Reminders",
+        "Basic Analytics",
+      ],
+    },
+    [TIERS.BASIC]: {
+      name: "Basic",
+      description: "Basic access account",
+      maxHabits: 3,
+      price: 0,
+      features: [
+        "Up to 1 Active Habits",
+        "Basic AI Insights",
+        "Daily Push Notification Reminders",
         "Basic Analytics",
       ],
     },
@@ -68,13 +81,16 @@ const TIERS = {
     return PRICING_TIERS[tier] ? PRICING_TIERS[tier].maxHabits : 1;
   }
   
-  function isWithinTrialPeriod(createdAt) {
-    const isTestMode = false;
-    const trialDuration = isTestMode
-      ? 30 * 1000 // 30 seconds for testing
-      : PRICING_TIERS[TIERS.PATHFINDER].durationDays * 24 * 60 * 60 * 1000;
-    return Date.now() - createdAt.getTime() < trialDuration;
+function isWithinTrialPeriod(createdAt, stripeSubscriptionStatus) {
+  if (stripeSubscriptionStatus !== 'trial') {
+    return false;
   }
+  const isTestMode = false;
+  const trialDuration = isTestMode
+    ? 30 * 1000 // 30 seconds for testing
+    : PRICING_TIERS[TIERS.PATHFINDER].durationDays * 24 * 60 * 60 * 1000;
+  return Date.now() - createdAt.getTime() < trialDuration;
+}
   
   export default {
     TIERS,

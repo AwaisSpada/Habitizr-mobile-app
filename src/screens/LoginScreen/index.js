@@ -343,7 +343,7 @@ const LoginScreen = (props) => {
               )}
             </TouchableOpacity>
             <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 15 }} onPress={() => setIsModalVisible(true)}>
-              <Text style={{ color: 'rgb(32, 139, 216)' }}>Forgot Password ?</Text>
+              <Text style={{ color: '#1c5c84' }}>Forgot Password ?</Text>
             </TouchableOpacity>
 
             <ForgotPasswordModal

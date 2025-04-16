@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
       mainTitle: {
         fontSize: 40,
         fontWeight: 'bold',
-        color: 'rgb(113,177,224)'
+        color: '#1c5c84'
       },
       animationText: {
         fontSize: 12,

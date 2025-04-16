@@ -19,12 +19,12 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "rgb(53,101,208)", // Blue color
+    color: "#1c5c84", // Blue color
   },
   upgradeButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgb(41,121,255)", // Blue button
+    backgroundColor: "#1c5c84", // Blue button
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 10,

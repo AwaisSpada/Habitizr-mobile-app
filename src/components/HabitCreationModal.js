@@ -64,7 +64,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
       return;
     }
     if (!reminderTime) {
-      Alert.alert("Error", "Please set a reminder time");
+      Alert.alert("Error", "Please set a remainder time");
       return;
     }
     if (!timezone) {
@@ -170,8 +170,8 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                 open={openFrequency}
                 value={frequency}
                 items={[
-                  { label: 'Daily', value: 'Daily' },
-                  { label: 'Semi-Daily', value: 'Semi-Daily' },
+                  { label: 'Every Day', value: 'Daily' },
+                  { label: 'Specific Days', value: 'Semi-Daily' },
                   { label: 'Weekly', value: 'Weekly' }
                 ]}
                 setOpen={setOpenFrequency}
@@ -226,7 +226,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                 </View>
               )}
 
-              <Text style={styles.label}>Reminder Time</Text>
+              <Text style={styles.label}>Remainder Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.input1}>
                 <Text>
                   {/* {reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'} */}
@@ -248,6 +248,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                     <DateTimePicker
                       value={time}
                       mode="time"
+                      themeVariant="light" // iOS-specific prop (on some RN versions)
                       display="spinner"
                       onChange={(event, selectedTime) => {
                         setShowTimePicker(false);
