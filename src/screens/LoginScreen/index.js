@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Image
+  Image,
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
@@ -55,7 +55,7 @@ const LoginScreen = (props) => {
       console.error('Failed to save Apple user info:', error);
     }
   };
-  
+
   const getUserInfo = async () => {
     try {
       const email = await AsyncStorage.getItem('apple_user_email');
@@ -73,16 +73,16 @@ const LoginScreen = (props) => {
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
       });
-  
+
       if (!appleAuthRequestResponse.identityToken) {
         throw new Error("Apple Sign-In failed - no identity token received");
       }
-  
+
       const { identityToken, user, email, fullName } = appleAuthRequestResponse;
-  
+
       let storedEmail = email;
       let storedName = fullName?.givenName;
-  
+
       // If email or name not available, fetch from local storage
       if (!email || !fullName) {
         const savedInfo = await getUserInfo();
@@ -92,7 +92,7 @@ const LoginScreen = (props) => {
         // Save info on first login
         await saveUserInfo(email, fullName?.givenName);
       }
-  
+
       let response = await appleLogin(storedEmail, storedName);
       if (response?.user) {
         login(response?.user);
@@ -108,7 +108,7 @@ const LoginScreen = (props) => {
       });
     }
   };
-  
+
 
   const handleGoogleLogin = async () => {
     try {
@@ -209,9 +209,10 @@ const LoginScreen = (props) => {
         setTimeout(() => props.navigation.navigate("Dashboard"), 100);
       }
     } catch (error) {
+      console.log('check register error', error)
       showMessage({
         message: "Error",
-        description: error?.message || 'Something went wrong!',
+        description: error.message || error || 'Something went wrong!',
         type: "danger",
       });
     } finally {
@@ -249,16 +250,19 @@ const LoginScreen = (props) => {
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => handleGoogleLogin()}>
                 <View style={styles.socialButton1}>
                   <Image source={require('../../assets/images/google.png')} style={{ width: 20, height: 20 }} />
-                  <Text style={styles.socialText}> Google</Text>
+                  <Text style={styles.socialText}>{Platform.OS === 'android' ? ' Continue with Google' : 'Google'} </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => signInWithApple()}>
-                <View style={styles.socialButton1}>
-                  <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
-                  <Text style={styles.socialText}> Apple</Text>
-                </View>
-
-              </TouchableOpacity>
+              {
+                Platform.OS === 'ios' ?
+                  <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => signInWithApple()}>
+                    <View style={styles.socialButton1}>
+                      <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
+                      <Text style={styles.socialText}> Apple</Text>
+                    </View>
+                  </TouchableOpacity>
+                  : null
+              }
             </View>
 
             <View style={styles.separatorContainer}>

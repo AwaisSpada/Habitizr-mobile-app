@@ -22,7 +22,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
   const [habitName, setHabitName] = useState('');
   const [description, setDescription] = useState('');
   const [frequency, setFrequency] = useState('Daily');
-  const [reminderTime, setReminderTime] = useState();
+  const [reminderTime, setReminderTime] = useState('');
   const [timezone, setTimezone] = useState('Asia/Karachi');
   const [openFrequency, setOpenFrequency] = useState(false);
   const [openTimezone, setOpenTimezone] = useState(false);
@@ -47,6 +47,11 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
       setFrequency(habit.selectedHabit || 'Daily');
       // setReminderTime(selectedHabit.reminderTime ? new Date(selectedHabit.reminderTime) : new Date());
       setTimezone(selectedHabit.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+      if (selectedHabit.reminderTime) {
+        setReminderTime(selectedHabit.reminderTime); 
+        setTime(new Date(selectedHabit.reminderTime));
+      }
     }
   }, [selectedHabit]);
 
@@ -64,7 +69,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
       return;
     }
     if (!reminderTime) {
-      Alert.alert("Error", "Please set a remainder time");
+      Alert.alert("Error", "Please set a reminder time");
       return;
     }
     if (!timezone) {
@@ -82,8 +87,13 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
     // Reset form fields after submission
     setHabitName('');
     setDescription('');
+    setReminderTime('');
   };
-
+  
+  const handleTimeSelect = (selectedTime) => {
+    setReminderTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+    setTime(selectedTime);
+  };
   // const toggleDateSelection = (day) => {
 
   //   const dateString = day.dateString;
@@ -228,12 +238,8 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
 
               <Text style={styles.label}>Remainder Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.input1}>
-                <Text>
-                  {/* {reminderTime ? new Date(reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'} */}
-                  {time ? time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
-                </Text>
+                <Text>{reminderTime || 'Select Time'}</Text> {/* Show selected time or placeholder */}
               </TouchableOpacity>
-
               {showTimePicker && Platform.OS === 'ios' && (
                 <View style={styles.tooltipContainer}>
                   <View style={styles.tooltip}>
@@ -253,10 +259,8 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                       onChange={(event, selectedTime) => {
                         setShowTimePicker(false);
                         if (selectedTime) {
-                          setTime(selectedTime);
-                          setReminderTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                          handleTimeSelect(selectedTime); // Update reminder time when selected
                         }
-
                       }}
                     />
                   </View>
@@ -271,8 +275,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                   onChange={(event, selectedTime) => {
                     setShowTimePicker(false);
                     if (selectedTime) {
-                      setTime(selectedTime);
-                      setReminderTime(selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
+                      handleTimeSelect(selectedTime); // Update reminder time when selected
                     }
                   }}
                 />

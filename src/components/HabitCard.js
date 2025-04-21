@@ -14,12 +14,31 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
     completed: false,
   });
 
-
   const [isLoading, setIsLoading] = useState(false);
 
   const confirmDelete = () => {
     onDelete(habit); // Call delete function
     setModalVisible(false); // Close modal after deleting
+  };
+
+  const handleDayPress = (day) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selectedDay = new Date(day.dateString);
+    selectedDay.setHours(0, 0, 0, 0);
+
+    console.log('today', today);
+    console.log('selectedDay', selectedDay);
+
+    if (selectedDay > today) {
+      alert("Please select the current date or a past date.");
+      return;
+    }
+
+    setSelectedDate(day.dateString);
+    setFormData({ completed: false });
+    setIsModalVisible(true);
   };
 
   const formattedDate = selectedDate
@@ -138,9 +157,6 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
 
     return marked;
   };
-
-
-
 
   return (
     <TouchableOpacity
@@ -270,12 +286,12 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
               markingType="custom"
               minDate={new Date(habit.startedAt)}
               maxDate={new Date()}
-              onDayPress={(day) => {
-                setSelectedDate(day.dateString);     // set date string
-                setFormData({ completed: false });   // reset form
-                setIsModalVisible(true);             // open modal
-              }}
-
+              // onDayPress={(day) => {
+              //   setSelectedDate(day.dateString);     // set date string
+              //   setFormData({ completed: false });   // reset form
+              //   setIsModalVisible(true);             // open modal
+              // }}
+              onDayPress={handleDayPress}
               monthFormat={'MMMM yyyy'} // e.g. "April 2025"
               markedDates={getMarkedDates(habit)} />
             <Modal
@@ -328,9 +344,6 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
                       disabled={isLoading}
                     />
                   </View>
-
-
-
                 </View>
               </View>
             </Modal>
