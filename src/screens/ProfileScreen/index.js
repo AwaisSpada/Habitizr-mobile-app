@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, TextInput, ActivityIndicator, Modal, StatusBar, Platform } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
 import { fetchUser, handleSubscription, cancelSubscription, deleteUser, changePassword, updatePhoneNumber, logoutUser } from '../../config/authService';
@@ -212,15 +212,15 @@ const ProfileScreen = (props) => {
       const response = await paymentStripe(plan)
       console.log('get payment client scret', response);
 
-            if(response == false){
-              showMessage({
-                message: "Success",
-                description: 'Basic Subscription Completed Successfully',
-                type: "success",
-              });
-              return;
-            }
-      
+      if (response == false) {
+        showMessage({
+          message: "Success",
+          description: 'Basic Subscription Completed Successfully',
+          type: "success",
+        });
+        return;
+      }
+
       setClientSecret(response);
       initializePaymentSheet(response);
     } catch (error) {
@@ -286,6 +286,10 @@ const ProfileScreen = (props) => {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
+      <StatusBar
+        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'dark-content'}
+        backgroundColor="rgb(243,249,254)"
+      />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           {/* Back Button */}
@@ -309,7 +313,17 @@ const ProfileScreen = (props) => {
             </View>
 
           </View>
-          <TouchableOpacity style={{ top: 15, flexDirection: 'row', alignItems: 'center' }} onPress={() => props.navigation.goBack()}>
+          <TouchableOpacity
+            style={{
+              marginTop: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              borderRadius: 12
+            }}
+            activeOpacity={0.7}
+            onPress={() => props.navigation.goBack()}
+          >
             <Icon name="arrow-left" size={24} color="black" />
             <Text style={{ paddingLeft: 10 }}>Back to Dashboard</Text>
           </TouchableOpacity>
@@ -455,7 +469,7 @@ const ProfileScreen = (props) => {
           </Modal>
         </View>
       </ScrollView>
-   { user &&  <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} user={user} />}
+      {user && <SubscriptionComparison visible={isUpgrading} onClose={() => setIsUpgrading(false)} stripePayment={fetchPaymentIntent} selectPlan={handleSelectPlan} loading={isLoading} user={user} />}
       <CancelSubscriptionDialog
         visible={visible}
         onClose={() => setVisible(false)}

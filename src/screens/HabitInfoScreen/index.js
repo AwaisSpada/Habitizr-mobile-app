@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView, StatusBar, Platform } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from './styles'
@@ -7,6 +7,10 @@ import styles from './styles'
 const HabitInfoScreen = (props) => {
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'dark-content'}
+        backgroundColor="rgb(243,249,254)"
+      />
       <View style={styles.header}>
         <Text style={styles.logo}>habitizr</Text>
         <View style={styles.headerIcons}>
@@ -25,23 +29,23 @@ const HabitInfoScreen = (props) => {
 
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10, right:10 }} />
+              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10, right: 10 }} />
               <Text style={styles.cardTitle}>Build positive habits:</Text>
             </View>
             <Text style={styles.cardText}>exercise, reading, meditation</Text>
           </View>
 
-          <View style={[styles.card, {marginTop:20}]}>
+          <View style={[styles.card, { marginTop: 20 }]}>
             <View style={styles.cardHeader}>
-              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10,right:10 }} />
+              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10, right: 10 }} />
               <Text style={styles.cardTitle}>Break negative patterns:</Text>
             </View>
             <Text style={styles.cardText}>smoking, procrastination</Text>
           </View>
 
-          <View style={[styles.card, {marginTop:20}]}>
+          <View style={[styles.card, { marginTop: 20 }]}>
             <View style={styles.cardHeader}>
-              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10, right:10 }} />
+              <AntDesign name="checkcircleo" size={20} color="#5A7BEF" style={{ top: 10, right: 10 }} />
               <Text style={styles.cardTitle}>Al-powered progress tracking</Text>
             </View>
             <Text style={styles.cardText}>and insights</Text>
@@ -65,7 +69,7 @@ const HabitInfoScreen = (props) => {
               Choose habits to build or break, set your schedule
             </Text>
           </View>
-          <View style={[styles.howItWorksCard, {marginTop:50}]}>
+          <View style={[styles.howItWorksCard, { marginTop: 50 }]}>
             <Image
               source={require('../../assets/images/guitar.jpeg')}
               style={styles.image}
@@ -75,7 +79,7 @@ const HabitInfoScreen = (props) => {
               Choose habits to build or break, set your schedule
             </Text>
           </View>
-          <View style={[styles.howItWorksCard, {marginTop:50}]}>
+          <View style={[styles.howItWorksCard, { marginTop: 50 }]}>
             <Image
               source={require('../../assets/images/yoga.jpeg')}
               style={styles.image}

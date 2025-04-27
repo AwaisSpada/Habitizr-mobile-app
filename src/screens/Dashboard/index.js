@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator, FlatList, Alert, AppState } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Modal, ActivityIndicator, FlatList, Alert, AppState, StatusBar, Platform, RefreshControl } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Feather from 'react-native-vector-icons/Feather'
 import HabitCreationModal from "../../components/HabitCreationModal";
@@ -14,8 +14,6 @@ import SubscriptionComparison from '../../components/SubscriptionComparison'
 import { paymentStripe } from '../../config/authService';
 import { useStripe } from '@stripe/stripe-react-native';
 import styles from "./styles";
-import { Image } from 'react-native';
-import { Calendar } from 'react-native-calendars';
 
 const Dashboard = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -346,6 +344,10 @@ const Dashboard = (props) => {
   return (
     <SafeAreaView style={styles.safeContainer}>
       {/* Fixed Header */}
+      <StatusBar
+        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'dark-content'}
+        backgroundColor="rgb(243,249,254)"
+      />
       <View style={styles.header}>
         <Text style={styles.logo}>habitizr</Text>
         {
@@ -372,7 +374,14 @@ const Dashboard = (props) => {
         </View>
       )}
       {/* Scrollable Content */}
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} refreshControl={
+        <RefreshControl
+          refreshing={loading}
+          onRefresh={fetchHabits}
+          tintColor="#1c5c84"  // spinner color
+          colors={["#1c5c84"]}  // Android spinner color
+        />
+      }>
 
         {/* Stats Cards */}
         <View style={styles.statCard}>
@@ -425,7 +434,7 @@ const Dashboard = (props) => {
                   onHabitInsights={handleHabitInsights}
                   stopRunning={() => handleStopRunning(habit)} // Fixed to pass habit as argument
                 />
-               
+
               </View>
             ))
           }

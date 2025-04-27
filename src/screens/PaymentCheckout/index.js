@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator, StatusBar, Platform } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { paymentStripe } from '../../config/authService';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -64,6 +64,10 @@ const PaymentCheckout = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             {/* Header */}
+                  <StatusBar
+                    barStyle={Platform.OS === 'ios' ? 'dark-content' : 'dark-content'}
+                    backgroundColor="rgb(243,249,254)"
+                  />
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Icon name="arrow-left" size={28} color="#fff" />

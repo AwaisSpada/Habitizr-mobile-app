@@ -8,7 +8,9 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
   const [loading, setLoading] = useState(false);
 
   const handlePasswordReset = async () => {
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    if (!emailRegex.test(email.trim())) {
       showMessage({
         message: "Error",
         description: "Please enter a valid email address.",
@@ -16,7 +18,6 @@ const ForgotPasswordModal = ({ visible, onClose }) => {
       });
       return;
     }
-
     setLoading(true);
     try {
       const response = await handleForgotPassword(email)

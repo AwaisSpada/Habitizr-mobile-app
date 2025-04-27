@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     dialogBox: {
-        // width: 300,
+        width: '90%',
         backgroundColor: 'white',
         padding: 30,
         borderRadius: 10,

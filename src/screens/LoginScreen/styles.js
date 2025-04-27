@@ -48,16 +48,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 10
   },
-  socialButton1:{
+  socialButton1: {
     flex: 1,
-    flexDirection:'row',
-    justifyContent:'space-between',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     padding: 12,
     alignItems: "center",
   },
   socialText: {
-    fontSize: 14,
-    fontWeight: "bold"
+    fontSize: 16,
+    fontWeight: "bold",
+    paddingLeft: 7
   },
   orText: {
     marginVertical: 10,
@@ -151,14 +152,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     marginTop: 30,
-    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowColor: "lightgrey",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 6,
     },
-    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
-    shadowRadius: 4, // Increase radius for a softer look
-    elevation: 4, // Keep elevation for Android shadow
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+
+    elevation: 12,
   },
   separatorContainer: {
     flexDirection: "row",
@@ -201,14 +203,15 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 30,
     marginBottom: 12,
-    shadowColor: "#aaa", // Change from black to gray for a softer shadow
+    shadowColor: "lightgrey",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 6,
     },
-    shadowOpacity: 0.15, // Reduce opacity for a lighter shadow
-    shadowRadius: 4, // Increase radius for a softer look
-    elevation: 4, // Keep elevation for Android shadow
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+
+    elevation: 12,
   },
   featureTitle: {
     fontSize: 16,
@@ -244,12 +247,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
-    borderRadius:10
-},
-checkedBox: {
+    borderRadius: 10
+  },
+  checkedBox: {
     backgroundColor: "#4A90E2",
     borderColor: "#4A90E2",
-},
+  },
 });
 
 export default styles;

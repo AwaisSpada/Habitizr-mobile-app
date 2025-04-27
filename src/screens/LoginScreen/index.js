@@ -9,6 +9,8 @@ import {
   Platform,
   ActivityIndicator,
   Image,
+  StatusBar,
+  SafeAreaView
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
@@ -142,6 +144,10 @@ const LoginScreen = (props) => {
   };
 
   const handleAuth = async () => {
+    const trimmedUsername = username.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const strongPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
     if (!username || !password || (!isLogin && !email)) {
       showMessage({
         message: "Error",
@@ -151,7 +157,17 @@ const LoginScreen = (props) => {
       return;
     }
 
-    if (username.length < 3) {
+    // Check if username is empty
+    if (!trimmedUsername) {
+      showMessage({
+        message: "Error",
+        description: 'Username cannot be empty or just spaces',
+        type: "danger",
+      });
+      return;
+    }
+
+    if (trimmedUsername.length < 3) {
       showMessage({
         message: "Error",
         description: 'Username must be at least 3 characters',
@@ -160,19 +176,28 @@ const LoginScreen = (props) => {
       return;
     }
 
-    if (!isLogin && !/\S+@\S+\.\S+/.test(email)) {
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(trimmedUsername) && isLogin === false) {
       showMessage({
         message: "Error",
-        description: 'Please enter a valid email address',
+        description: 'Username can only contain letters, numbers, and underscores.',
+        type: "danger",
+      });
+      return;
+    }
+    if (!isLogin && !emailRegex.test(email.trim())) {
+      showMessage({
+        message: "Error",
+        description: 'Please enter a valid email address.',
         type: "danger",
       });
       return;
     }
 
-    if (password.length < 6) {
+    if (!strongPasswordRegex.test(password) && isLogin === false) {
       showMessage({
         message: "Error",
-        description: 'Password must be at least 6 characters',
+        description: 'Password must be at least 6 characters long and include letters, numbers, and special characters.',
         type: "danger",
       });
       return;
@@ -195,10 +220,10 @@ const LoginScreen = (props) => {
         : await registerUser({ username, email, password });
       showMessage({
         message: 'Success',
-        description: isLogin ? "Login Successful!" : "Registration Successful!",
+        description: isLogin ? "Login Successful!" : "Registration Successful.Email Verification is Required Before Logging In.!",
         type: "success",
       });
-
+      setIsLogin(true)
       setUsername("");
       setEmail("");
       setPassword("");
@@ -221,166 +246,173 @@ const LoginScreen = (props) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View style={{ paddingTop: 10, alignSelf: "flex-start", paddingLeft: 10 }}>
-        <Text style={styles.mainTitle}>Habitizr</Text>
-      </View>
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "rgb(243,249,254)" }}>
+      <StatusBar
+        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'dark-content'}
+        backgroundColor="rgb(243,249,254)"
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
       >
-        <Text style={styles.header}>Start Your Journey to Better Habits Today!</Text>
-        <Text style={styles.subHeader}>
-          Join thousands of others who have transformed their lives with AI-powered habit tracking.
-        </Text>
+        <View style={{ paddingTop: 10, alignSelf: "flex-start", paddingLeft: 10 }}>
+          <Text style={styles.mainTitle}>Habitizr</Text>
+        </View>
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.title}>Welcome to Habitizr</Text>
-          <Text style={styles.subtitle}>
-            {isLogin ? "Log in to continue" : "Create an account to get started"}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.header}>Start Your Journey to Better Habits Today!</Text>
+          <Text style={styles.subHeader}>
+            Join thousands of others who have transformed their lives with AI-powered habit tracking.
           </Text>
 
-          {/* Social Login Buttons */}
-          <View style={{ alignItems: "center", paddingTop: 20 }}>
-            <View style={styles.socialContainer}>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => handleGoogleLogin()}>
-                <View style={styles.socialButton1}>
-                  <Image source={require('../../assets/images/google.png')} style={{ width: 20, height: 20 }} />
-                  <Text style={styles.socialText}>{Platform.OS === 'android' ? ' Continue with Google' : 'Google'} </Text>
-                </View>
-              </TouchableOpacity>
-              {
-                Platform.OS === 'ios' ?
-                  <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => signInWithApple()}>
-                    <View style={styles.socialButton1}>
-                      <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
-                      <Text style={styles.socialText}> Apple</Text>
-                    </View>
-                  </TouchableOpacity>
-                  : null
-              }
-            </View>
+          <View style={styles.loginContainer}>
+            <Text style={styles.title}>Welcome to Habitizr</Text>
+            <Text style={styles.subtitle}>
+              {isLogin ? "Log in to continue" : "Create an account to get started"}
+            </Text>
 
-            <View style={styles.separatorContainer}>
-              <View style={styles.line} />
-              <Text style={styles.separatorText}>OR CONTINUE WITH</Text>
-              <View style={styles.line} />
-            </View>
+            {/* Social Login Buttons */}
+            <View style={{ alignItems: "center", paddingTop: 20 }}>
+              <View style={styles.socialContainer}>
+                <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => handleGoogleLogin()}>
+                  <View style={styles.socialButton1}>
+                    <Image source={require('../../assets/images/google.png')} style={{ width: 20, height: 20 }} />
+                    <Text style={styles.socialText}>{Platform.OS === 'android' ? ' Continue with Google' : 'Google'} </Text>
+                    <Text></Text>
+                  </View>
+                </TouchableOpacity>
+                {
+                  Platform.OS === 'ios' ?
+                    <TouchableOpacity style={styles.socialButton} activeOpacity={0.7} onPress={() => signInWithApple()}>
+                      <View style={styles.socialButton1}>
+                        <Image source={require('../../assets/images/apple.png')} style={{ width: 20, height: 20 }} />
+                        <Text style={styles.socialText}> Apple</Text>
+                      </View>
+                    </TouchableOpacity>
+                    : null
+                }
+              </View>
 
-            {/* Toggle Login/Register */}
-            <View style={styles.switchContainer}>
-              <TouchableOpacity
-                style={[styles.switchButton, isLogin && styles.activeButton]}
-                onPress={() => setIsLogin(true)}
-              >
-                <Text style={[styles.switchText, isLogin && styles.activeText]}>Login</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.switchButton, !isLogin && styles.activeButton]}
-                onPress={() => setIsLogin(false)}
-              >
-                <Text style={[styles.switchText, !isLogin && styles.activeText]}>Register</Text>
-              </TouchableOpacity>
-            </View>
+              <View style={styles.separatorContainer}>
+                <View style={styles.line} />
+                <Text style={styles.separatorText}>OR CONTINUE WITH</Text>
+                <View style={styles.line} />
+              </View>
 
-            {/* Input Fields */}
-            <View style={styles.formContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Username"
-                placeholderTextColor="#888"
-                value={username}
-                onChangeText={setUsername}
-              />
-              {!isLogin && (
+              {/* Toggle Login/Register */}
+              <View style={styles.switchContainer}>
+                <TouchableOpacity
+                  style={[styles.switchButton, isLogin && styles.activeButton]}
+                  onPress={() => setIsLogin(true)}
+                >
+                  <Text style={[styles.switchText, isLogin && styles.activeText]}>Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.switchButton, !isLogin && styles.activeButton]}
+                  onPress={() => setIsLogin(false)}
+                >
+                  <Text style={[styles.switchText, !isLogin && styles.activeText]}>Register</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Input Fields */}
+              <View style={styles.formContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Username"
+                  placeholderTextColor="#888"
+                  value={username}
+                  onChangeText={setUsername}
+                />
+                {!isLogin && (
+                  <TextInput
+                    style={[styles.input, { marginTop: 12 }]}
+                    placeholder="Email"
+                    placeholderTextColor="#888"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                )}
                 <TextInput
                   style={[styles.input, { marginTop: 12 }]}
-                  placeholder="Email"
+                  placeholder="Password"
+                  secureTextEntry
                   placeholderTextColor="#888"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
+                  value={password}
+                  onChangeText={setPassword}
                 />
-              )}
-              <TextInput
-                style={[styles.input, { marginTop: 12 }]}
-                placeholder="Password"
-                secureTextEntry
-                placeholderTextColor="#888"
-                value={password}
-                onChangeText={setPassword}
+
+                {/* Terms Checkbox for Register */}
+                {!isLogin && (
+                  <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setIsChecked(!isChecked)}
+                  >
+                    <View style={[styles.checkbox, isChecked && styles.checkedBox]}>
+                      {isChecked && (
+                        <Entypo name="check" size={15} color="white" />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxText}>
+                      I agree to the <Text style={styles.link}>terms of service</Text>
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleAuth}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.submitText}>{isLogin ? "Login" : "Register"}</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 15 }} onPress={() => setIsModalVisible(true)}>
+                <Text style={{ color: '#1c5c84' }}>Forgot Password ?</Text>
+              </TouchableOpacity>
+
+              <ForgotPasswordModal
+                visible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
               />
-
-              {/* Terms Checkbox for Register */}
-              {!isLogin && (
-                <TouchableOpacity
-                  style={styles.checkboxContainer}
-                  onPress={() => setIsChecked(!isChecked)}
-                >
-                  <View style={[styles.checkbox, isChecked && styles.checkedBox]}>
-                    {isChecked && (
-                      <Entypo name="check" size={15} color="white" />
-                    )}
-                  </View>
-                  <Text style={styles.checkboxText}>
-                    I agree to the <Text style={styles.link}>terms of service</Text>
-                  </Text>
-                </TouchableOpacity>
-              )}
             </View>
-            {/* Submit Button */}
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleAuth}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.submitText}>{isLogin ? "Login" : "Register"}</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 15 }} onPress={() => setIsModalVisible(true)}>
-              <Text style={{ color: '#1c5c84' }}>Forgot Password ?</Text>
-            </TouchableOpacity>
-
-            <ForgotPasswordModal
-              visible={isModalVisible}
-              onClose={() => setIsModalVisible(false)}
-            />
           </View>
-        </View>
 
-        <Text style={styles.sectionTitle}>Why Choose Habitizr?</Text>
+          <Text style={styles.sectionTitle}>Why Choose Habitizr?</Text>
 
-        <View style={styles.featureCard}>
-          <Text style={styles.featureTitle}>Simple & Effective</Text>
-          <Text style={styles.featureText}>
-            Track your habits via SMS - no apps to install, no notifications to ignore.
-          </Text>
-        </View>
+          <View style={styles.featureCard}>
+            <Text style={styles.featureTitle}>Simple & Effective</Text>
+            <Text style={styles.featureText}>
+              Track your habits via SMS - no apps to install, no notifications to ignore.
+            </Text>
+          </View>
 
-        <View style={[styles.featureCard, { marginTop: 20 }]}>
-          <Text style={styles.featureTitle}>AI-Powered Insights</Text>
-          <Text style={styles.featureText}>
-            Get personalized feedback and motivation based on your responses.
-          </Text>
-        </View>
+          <View style={[styles.featureCard, { marginTop: 20 }]}>
+            <Text style={styles.featureTitle}>AI-Powered Insights</Text>
+            <Text style={styles.featureText}>
+              Get personalized feedback and motivation based on your responses.
+            </Text>
+          </View>
 
-        <View style={[styles.featureCard, { marginTop: 20 }]}>
-          <Text style={styles.featureTitle}>Proven Results</Text>
-          <Text style={styles.featureText}>
-            Join thousands who have successfully built lasting habits with our platform.
-          </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={[styles.featureCard, { marginTop: 20 }]}>
+            <Text style={styles.featureTitle}>Proven Results</Text>
+            <Text style={styles.featureText}>
+              Join thousands who have successfully built lasting habits with our platform.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
