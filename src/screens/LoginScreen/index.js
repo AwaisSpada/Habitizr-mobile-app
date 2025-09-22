@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
   Image,
   StatusBar,
-  SafeAreaView
+  SafeAreaView,
+  Linking
 } from "react-native";
 import styles from "./styles";
 import { showMessage } from "react-native-flash-message";
@@ -102,6 +103,10 @@ const LoginScreen = (props) => {
       }
       console.log('Apple API Response:', response);
     } catch (error) {
+      if(error.code === appleAuth.Error.CANCELED) {
+        console.log('User cancelled the login process');  
+        return;
+      }
       console.error("Apple Sign-In Error:", error);
       showMessage({
         message: "Error",
@@ -237,7 +242,7 @@ const LoginScreen = (props) => {
       console.log('check register error', error)
       showMessage({
         message: "Error",
-        description: error.message || error || 'Something went wrong!',
+        description: error.message || error || 'Email or Password is already in use',
         type: "danger",
       });
     } finally {
@@ -358,8 +363,9 @@ const LoginScreen = (props) => {
                         <Entypo name="check" size={15} color="white" />
                       )}
                     </View>
-                    <Text style={styles.checkboxText}>
-                      I agree to the <Text style={styles.link}>terms of service</Text>
+                    <Text style={styles.checkboxText}
+                      onPress={() => Linking.openURL('https://habitizr.com/?tos=true')}>
+                      I accept the <Text style={styles.link}>Terms of Service</Text>
                     </Text>
                   </TouchableOpacity>
                 )}

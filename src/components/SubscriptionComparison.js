@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, SafeAreaView, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Modal, SafeAreaView, ActivityIndicator, Platform } from 'react-native';
 import Icon from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
 import tiers from "../lib/tiers";
@@ -78,10 +77,9 @@ const features = [
 const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, loading, user }) => {
     const { TIERS, PRICING_TIERS } = tiers;
 
-    const navigation = useNavigation();
     const [packageError, setPackageError] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(TIERS.TRAILBLAZER);
-    console.log(user);
+    
     if (!user) {
         // showMessage({
         //     message: "Error",
@@ -95,7 +93,7 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
     const handleSelectPlan = (plan) => {
         console.log('PLAN:: ', plan);
         console.log(user?.packageType);
-        if (plan === user?.packageType && user?.stripeSubscriptionStatus !== 'trial' ) {
+        if (plan === user?.packageType && user?.stripeSubscriptionStatus !== 'trial') {
             setPackageError(true);
             return;
         }
@@ -116,7 +114,7 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
         })();
     }, [isPlatformPaySupported]);
 
-    // ...
+      
 
 
     const fetchPaymentIntent = async () => {
@@ -147,14 +145,13 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
     };
 
     const pay = async () => {
-        console.log('PSSSSL: ', selectedPlan);
         let price = 0;
         if (selectedPlan === TIERS.BASIC) {
             price = 0;
         } else if (selectedPlan === TIERS.PATHFINDER) {
-            price = 6.99;
+            price = 6.49;
         } else if (selectedPlan === TIERS.TRAILBLAZER) {
-            price = 9.99;
+            price = 9.49;
         }
         const clientSecret = await fetchPaymentIntent()
         const { error, paymentIntent } = await confirmPlatformPayPayment(
@@ -180,14 +177,13 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
         if (error) {
             console.log(error);
         } else {
-            console.log(paymentIntent);
             //   Alert.alert('Success', 'Check the logs for payment intent details.');
             showMessage({
                 message: "Success",
                 description: 'Payment completed!',
                 type: "success",
             });
-            
+
         }
         onClose()
     };
@@ -320,44 +316,49 @@ const SubscriptionComparison = ({ visible, onClose, stripePayment, selectPlan, l
                             ))}
                         </TouchableOpacity>
 
-                        {
-                            selectedPlan !== TIERS.BASIC && isApplePaySupported ? (
-                                <PlatformPayButton
-                                    onPress={pay}
-                                    type={PlatformPay.ButtonType.Order}
-                                    appearance={PlatformPay.ButtonStyle.Automatic}
-                                    borderRadius={4}
-                                    marginTop={10}
-                                    style={{
-                                        width: '100%',
-                                        height: 50,
-                                    }}
-                                />
-                            ) : (
-                                <TouchableOpacity
-                                    style={{
-                                        backgroundColor: 'rgb(83,121,166)',
-                                        padding: 12,
-                                        borderRadius: 15,
-                                        alignItems: 'center',
-                                        marginBottom: 20,
-                                        marginTop: 10,
-                                    }}
-                                    onPress={() => {
-                                        stripePayment();
-                                        onClose();
-                                    }}
-                                >
-                                    {loading ? (
-                                        <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                        <Text style={{ color: 'white', textAlign: 'center' }}>
-                                            Upgrade to {selectedPlan}
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                            )
-                        }
+                        {Platform.OS === 'android' ? (
+                            // Android → Show Stripe button only
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: 'rgb(83,121,166)',
+                                    padding: 12,
+                                    borderRadius: 15,
+                                    alignItems: 'center',
+                                    marginBottom: 20,
+                                    marginTop: 10,
+                                }}
+                                onPress={() => {
+                                    stripePayment();
+                                    onClose();
+                                }}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Text style={{ color: 'white', textAlign: 'center' }}>
+                                        Upgrade to {selectedPlan}
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        ) : selectedPlan !== TIERS.BASIC && isApplePaySupported ? (
+                            // iOS with Apple Pay support → Show Apple Pay
+                            <PlatformPayButton
+                                onPress={pay}
+                                type={PlatformPay.ButtonType.Order}
+                                appearance={PlatformPay.ButtonStyle.Automatic}
+                                borderRadius={4}
+                                marginTop={10}
+                                style={{
+                                    width: '100%',
+                                    height: 50,
+                                }}
+                            />
+                        ) : (
+                            // iOS without Apple Pay support → Show error
+                            <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>
+                                Sorry, Apple Pay is not supported on this device
+                            </Text>
+                        )}
 
                     </ScrollView>
                 </View>

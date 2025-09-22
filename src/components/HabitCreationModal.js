@@ -236,7 +236,7 @@ const HabitCreationModal = ({ visible, onClose, onCreate, habit, selectedHabit }
                 </View>
               )}
 
-              <Text style={styles.label}>Remainder Time</Text>
+              <Text style={styles.label}>Reminder Time</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.input1}>
                 <Text>{reminderTime || 'Select Time'}</Text> {/* Show selected time or placeholder */}
               </TouchableOpacity>

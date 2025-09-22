@@ -546,14 +546,14 @@ export const deleteUser = async () => {
     }
 };
 
-export const changePassword = async (newPassword) => {
+export const changePassword = async (newPassword,currentPassword) => {
     try {
         const response = await fetch(`${BASE_URL}/api/user/change-password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ newPassword }),
+            body: JSON.stringify({ newPassword,currentPassword }),
         });
 
         if (!response.ok) {
@@ -563,6 +563,9 @@ export const changePassword = async (newPassword) => {
         return await response.json();
     } catch (error) {
         console.error("Error changing password:", error);
+        if(error.response?.status === 401){
+            throw new Error('Current Password is incorrect');
+        }
         throw new Error(error.message || "Failed to change password");
     }
 };

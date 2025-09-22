@@ -28,9 +28,6 @@ const HabitCard = ({ habit, onEdit, onDelete, onStart, onHabitInsights, stopRunn
     const selectedDay = new Date(day.dateString);
     selectedDay.setHours(0, 0, 0, 0);
 
-    console.log('today', today);
-    console.log('selectedDay', selectedDay);
-
     if (selectedDay > today) {
       alert("Please select the current date or a past date.");
       return;

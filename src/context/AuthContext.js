@@ -45,9 +45,31 @@ export const AuthProvider = ({ children }) => {
             console.error('Error logging out:', error);
         }
     };
+    const refreshUser = async () => {
+        try {
+          const response = await fetch('https://habitizr.com/api/user', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include', // 🔐 Important: includes session cookie
+          });
+      
+          if (!response.ok) throw new Error('Not authenticated');
+      
+          const user = await response.json();
+          await AsyncStorage.setItem('user', JSON.stringify(user));
+          setUser(user);
+        } catch (error) {
+          console.error('Failed to refresh user:', error);
+          // Optionally log out or show a session timeout message
+          // logout();
+        }
+      };
+      
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

@@ -11,7 +11,7 @@ const TIERS = {
       name: "Pathfinder",
       description: "Start your habit-building journey",
       maxHabits: 1,
-      price: 6.99,
+      price: 6.49,
       durationDays: 7,
       stripePriceId: "price_1Qtrg9JKwzZ1wTvdDh1RAWYg",
       features: [
@@ -25,7 +25,7 @@ const TIERS = {
       name: "Trailblazer",
       description: "For serious habit builders",
       maxHabits: 3,
-      price: 9.99,
+      price: 9.49,
       stripePriceId: "price_1QtrgZJKwzZ1wTvdLLKVhRP0",
       features: [
         "Up to 3 Active Habits",
